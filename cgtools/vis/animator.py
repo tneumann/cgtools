@@ -52,8 +52,8 @@ class Animator(HasTraits):
                 HGroup(
                     Item('start', show_label=False),
                     Item('stop', show_label=False),
-                    Item('next_frame', show_label=False, enabled_when='current_frame < last_frame'),
-                    Item('prev_frame', show_label=False, enabled_when='current_frame > 1'),
+                    Item('next_frame', show_label=False, enabled_when='current_frame < _last_frame'),
+                    Item('prev_frame', show_label=False, enabled_when='current_frame > 0'),
                 ),
                 HGroup(
                     Item(name = 'loop'),
