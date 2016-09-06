@@ -195,7 +195,7 @@ class Animator(HasTraits):
         renwin.aa_frames = 8
         renwin.alpha_bit_planes = 1
         # turn on off screen rendering
-        renwin.off_screen_rendering = True
+        #renwin.off_screen_rendering = True
         # set size of window
         if self.fix_image_size:
             orig_size = renwin.size
@@ -222,7 +222,7 @@ class Animator(HasTraits):
         renwin.aa_frames = aa_frames
         if self.fix_image_size:
             renwin.size = orig_size
-        renwin.off_screen_rendering = False
+        #renwin.off_screen_rendering = False
         self.is_rendering_animation = False
         progress.close()
 
