@@ -14,6 +14,12 @@ def pointcloud_as_vtk_polydata(points, scalars=None, pt_colors=None, polydata=No
         polydata.point_data.scalars = pt_colors.astype(np.uint8)
     return polydata
 
+def pointcloud_as_vtk_actor(points, pt_colors=None, point_size=5.0, alpha=1.0):
+    pd = pointcloud_as_vtk_polydata(points, pt_colors)
+    actor = tvtk.Actor(mapper=tvtk.PolyDataMapper(input=pd))
+    actor.property.set(point_size=point_size, opacity=alpha)
+    return pd, actor
+
 def vispoints(pts, point_colors=None, point_size=5., mode='2dvertex', **kwargs):
     v = mlab.points3d(
         pts[:,0], pts[:,1], pts[:,2], 
