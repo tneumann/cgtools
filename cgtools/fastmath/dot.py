@@ -26,8 +26,6 @@ def matmat(a, b):
         raise ValueError, "arrays must have suitable shape for matrix multiplication"
     if a.ndim != b.ndim != 3:
         raise ValueError, "both arrays are expected to be arrays of 2d matrices (thus, should have 3 dimensions)"
-    if a.shape[-1] != b.shape[-2] or a.shape[-2] != b.shape[-1]:
-        raise ValueError, "matrices must be compatible for multiplication"
     code = """
         using namespace blitz;
         firstIndex i;
