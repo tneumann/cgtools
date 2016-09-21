@@ -1,7 +1,7 @@
 import numpy as np
 from StringIO import StringIO
 
-def save_mesh(filename, vertices=None, faces=None):
+def save_off(filename, vertices=None, faces=None):
     if vertices is None:
         vertices = []
     if faces is None:
@@ -15,7 +15,7 @@ def save_mesh(filename, vertices=None, faces=None):
                 fmt = " ".join(["%d"] * (len(face) + 1)) + "\n"
                 f.write(fmt % ((len(face),) + tuple(map(int, face))))
 
-def read_mesh(filename, no_colors=False):
+def load_off(filename, no_colors=False):
     lines = open(filename).readlines()
     lines = [line for line in lines if line.strip() != '' and line[0] != '#']
     assert lines[0].strip() in ['OFF', 'COFF'], 'OFF header missing'
