@@ -126,3 +126,22 @@ def toskewsym(v):
                      [v[2], 0, -v[0]],
                      [-v[1], v[0], 0]])
 
+def convert_3x4_to_4x4(matrices, new_row=[0, 0, 0, 1]):
+    """
+    Turn a 3x4 matrix or an array of 3x4 matrices into 4x4 matrices by appending the <new_row>.
+    >>> A = np.zeros((3, 4))
+    >>> convert_3x4_to_4x4(A).shape
+    (4, 4)
+    >>> convert_3x4_to_4x4(A)[3].tolist()
+    [0.0, 0.0, 0.0, 1.0]
+    >>> many_A = np.random.random((10, 20, 3, 4))
+    >>> many_A_4x4 = convert_3x4_to_4x4(many_A)
+    >>> many_A_4x4.shape
+    (10, 20, 4, 4)
+    >>> many_A_4x4[2, 1, 3].tolist()
+    [0.0, 0.0, 0.0, 1.0]
+    >>> np.all(many_A_4x4[:, :, :3, :] == many_A)
+    True
+    """
+    assert matrices.shape[-1] == 4 and matrices.shape[-2] == 3
+    return np.insert(matrices, 3, new_row, axis=-2)
