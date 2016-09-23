@@ -8,6 +8,6 @@ setup(
   author_email = "neumann.thomas@gmail.com",
   description = "Tools computer graphics and vision, mostly for numpy / scipy",
   license = "MIT",
-  packages = ['cgtools'],
+  packages = ['cgtools', 'cgtools.fastmath', 'cgtools.io', 'cgtools.vis'],
 )
 
