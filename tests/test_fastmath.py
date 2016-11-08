@@ -56,13 +56,19 @@ def test_matmat_single():
     assert r1.shape == r2.shape
     np.testing.assert_allclose(r1, r2)
 
-
 def test_inv3():
     T = np.random.random((3, 3))
     np.testing.assert_allclose(np.linalg.inv(T), inv3(T))
 
 def test_inv3_multiple():
     Ts = np.random.random((154, 7, 3, 3))
+    Tinv_np = np.array(map(np.linalg.inv, Ts.reshape((-1, 3, 3)))).reshape(Ts.shape)
+    Tinv_blitz = inv3(Ts)
+    np.set_printoptions(suppress=True)
+    np.testing.assert_allclose(Tinv_np, Tinv_blitz)
+
+def test_inv3_float32():
+    Ts = np.random.random((10, 3, 3)).astype(np.float32)
     Tinv_np = np.array(map(np.linalg.inv, Ts.reshape((-1, 3, 3)))).reshape(Ts.shape)
     Tinv_blitz = inv3(Ts)
     np.set_printoptions(suppress=True)
@@ -78,7 +84,6 @@ def test_inv2_multiple():
     Tinv_blitz = inv2(Ts)
     np.set_printoptions(suppress=True)
     np.testing.assert_allclose(Tinv_np, Tinv_blitz)
-
 
 def test_cross3():
     a = np.random.random((1000, 3))
