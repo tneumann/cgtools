@@ -87,6 +87,14 @@ def test_inv2_multiple():
     np.set_printoptions(suppress=True)
     np.testing.assert_allclose(Tinv_np, Tinv_blitz)
 
+def test_inv2_float32():
+    Ts = np.random.random((10, 2, 2)).astype(np.float32)
+    Tinv_np = np.array(map(np.linalg.inv, Ts)).reshape(Ts.shape)
+    Tinv_blitz = inv2(Ts)
+    assert Tinv_blitz.dtype == np.float32
+    np.set_printoptions(suppress=True)
+    np.testing.assert_array_almost_equal(Tinv_np, Tinv_blitz, decimal=4)
+
 def test_cross3():
     a = np.random.random((1000, 3))
     b = np.random.random((1000, 3))

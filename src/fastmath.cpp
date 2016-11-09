@@ -22,7 +22,7 @@ py::array_t<float_t> inv3(py::array_t<float_t, py::array::c_style> & Ts)
         const double det = T00 * (T22 * T11 - T21 * T12) \
                          - T10 * (T22 * T01 - T21 * T02) \
                          + T20 * (T12 * T01 - T11 * T02);
-        double invDet = 1. / det;
+        const double invDet = 1. / det;
         pR[0] =  (T11 * T22 - T21 * T12) * invDet;
         pR[1] = -(T01 * T22 - T02 * T21) * invDet;
         pR[2] =  (T01 * T12 - T02 * T11) * invDet;
@@ -40,11 +40,39 @@ py::array_t<float_t> inv3(py::array_t<float_t, py::array::c_style> & Ts)
     return result;
 }
 
+template<typename float_t>
+py::array_t<float_t> inv2(py::array_t<float_t, py::array::c_style> & Ts)
+{
+    auto Ts_buf = Ts.request();
+    float_t *pT = (float_t*)Ts_buf.ptr;
+
+    auto result = py::array_t<float_t, py::array::c_style>(Ts_buf.size);
+    auto result_buf = result.request();
+    float_t *pR = (float_t*)result_buf.ptr;
+
+    for (size_t idx = 0; idx < Ts_buf.shape[0]; idx++) {
+        const float_t T00 = pT[0], T01 = pT[1];
+        const float_t T10 = pT[2], T11 = pT[3];
+        const double det = T00 * T11 - T01 * T10;
+        const double invDet = 1. / det;
+        pR[0] =  T11 * invDet;
+        pR[1] = -1 * T01 * invDet;
+        pR[2] = -1 * T10 * invDet;
+        pR[3] = T00 * invDet;
+
+        pT += 2*2;
+        pR += 2*2;
+    }
+
+    return result;
+}
 
 PYBIND11_PLUGIN(_fastmath_ext) {
     py::module m("_fastmath_ext");
     m.def("inv3", &inv3<float>);
     m.def("inv3", &inv3<double>);
+    m.def("inv2", &inv2<float>);
+    m.def("inv2", &inv2<double>);
 
     return m.ptr();
 }
