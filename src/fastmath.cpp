@@ -127,6 +127,40 @@ py::array_t<float_t> matvec(
     return result;
 }
 
+template<typename float_t>
+py::array_t<float_t> cross3(
+        py::array_t<float_t, py::array::c_style> & a,
+        py::array_t<float_t, py::array::c_style> & b
+    )
+{
+    auto a_buf = a.request();
+    float_t *p_a = (float_t*)a_buf.ptr;
+    auto b_buf = b.request();
+    float_t *p_b = (float_t*)b_buf.ptr;
+
+    auto result = py::array_t<float_t, py::array::c_style>(
+            std::vector<size_t>({{a_buf.shape[0], a_buf.shape[1]}}) );
+    auto result_buf = result.request();
+    float_t *p_res = (float_t*)result_buf.ptr;
+
+    for (size_t idx = 0; idx < a_buf.shape[0]; idx++) {
+        const double ax = p_a[0];
+        const double ay = p_a[1];
+        const double az = p_a[2];
+        const double bx = p_b[0];
+        const double by = p_b[1];
+        const double bz = p_b[2];
+        p_res[0] = ay * bz - az * by;
+        p_res[1] = az * bx - ax * bz;
+        p_res[2] = ax * by - ay * bx;
+        p_res += 3;
+        p_a += 3;
+        p_b += 3;
+    }
+
+    return result;
+}
+
 
 PYBIND11_PLUGIN(_fastmath_ext) {
     py::module m("_fastmath_ext");
@@ -136,6 +170,7 @@ PYBIND11_PLUGIN(_fastmath_ext) {
     m.def("inv2", &inv2<double>);
     m.def("matmat", &matmat<double>);
     m.def("matvec", &matvec<double>);
+    m.def("cross3", &cross3<double>);
 
     return m.ptr();
 }

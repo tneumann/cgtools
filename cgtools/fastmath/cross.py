@@ -1,5 +1,5 @@
 import numpy as np
-from scipy import weave
+import _fastmath_ext
 
 __all__ = ['cross3']
 
@@ -24,29 +24,7 @@ def cross3(a, b):
         raise ValueError, "a and b must have the same shape, but shape(a)=%d and shape(b)=%d" % (a.shape, b.shape)
     a = a.reshape(-1, 3)
     b = b.reshape(-1, 3)
-    result = np.empty(a.shape, np.promote_types(a.dtype, b.dtype))
-    n = a.shape[0]
-    code = """
-        using namespace blitz;
-        //#pragma omp parallel for
-        for(int i=0; i < n; i++) {
-            const double a1 = a(i, 0);
-            const double a2 = a(i, 1);
-            const double a3 = a(i, 2);
-            const double b1 = b(i, 0);
-            const double b2 = b(i, 1);
-            const double b3 = b(i, 2);
-            result(i, 0) = a2 * b3 - a3 * b2;
-            result(i, 1) = a3 * b1 - a1 * b3;
-            result(i, 2) = a1 * b2 - a2 * b1;
-        }
-    """
-    weave.inline(code, ['a', 'b', 'n', 'result'],
-                 #verbose=2, force=1,
-                 #extra_compile_args=['-fopenmp'],
-                 #extra_link_args=['-fopenmp'],
-                 type_converters=weave.converters.blitz)
-    return result.reshape(orig_shape)
+    return _fastmath_ext.cross3(a, b).reshape(orig_shape)
 
 if __name__ == '__main__':
     import timeit
