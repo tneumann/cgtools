@@ -54,6 +54,7 @@ def test_matmat_single():
     r1 = matmat(a, b)
     r2 = np.dot(a, b)
     assert r1.shape == r2.shape
+    assert r1.dtype == r2.dtype
     np.testing.assert_allclose(r1, r2)
 
 def test_inv3():
@@ -71,8 +72,9 @@ def test_inv3_float32():
     Ts = np.random.random((10, 3, 3)).astype(np.float32)
     Tinv_np = np.array(map(np.linalg.inv, Ts.reshape((-1, 3, 3)))).reshape(Ts.shape)
     Tinv_blitz = inv3(Ts)
+    assert Tinv_blitz.dtype == np.float32
     np.set_printoptions(suppress=True)
-    np.testing.assert_allclose(Tinv_np, Tinv_blitz)
+    np.testing.assert_array_almost_equal(Tinv_np, Tinv_blitz, decimal=4)
 
 def test_inv2():
     T = np.random.random((2, 2))

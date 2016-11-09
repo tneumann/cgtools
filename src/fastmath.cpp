@@ -5,19 +5,20 @@
 namespace py = pybind11;
 
 
-py::array_t<double> inv3(py::array_t<double, py::array::c_style | py::array::forcecast> & Ts)
+template<typename float_t>
+py::array_t<float_t> inv3(py::array_t<float_t, py::array::c_style> & Ts)
 {
     auto Ts_buf = Ts.request();
-    double *pT = (double*)Ts_buf.ptr;
+    float_t *pT = (float_t*)Ts_buf.ptr;
 
-    auto result = py::array_t<double, py::array::c_style | py::array::forcecast>(Ts_buf.size);
+    auto result = py::array_t<float_t, py::array::c_style>(Ts_buf.size);
     auto result_buf = result.request();
-    double *pR = (double*)result_buf.ptr;
+    float_t *pR = (float_t*)result_buf.ptr;
 
     for (size_t idx = 0; idx < Ts_buf.shape[0]; idx++) {
-        const double T00 = pT[0], T01 = pT[1], T02 = pT[2];
-        const double T10 = pT[3], T11 = pT[4], T12 = pT[5];
-        const double T20 = pT[6], T21 = pT[7], T22 = pT[8];
+        const float_t T00 = pT[0], T01 = pT[1], T02 = pT[2];
+        const float_t T10 = pT[3], T11 = pT[4], T12 = pT[5];
+        const float_t T20 = pT[6], T21 = pT[7], T22 = pT[8];
         const double det = T00 * (T22 * T11 - T21 * T12) \
                          - T10 * (T22 * T01 - T21 * T02) \
                          + T20 * (T12 * T01 - T11 * T02);
@@ -42,7 +43,8 @@ py::array_t<double> inv3(py::array_t<double, py::array::c_style | py::array::for
 
 PYBIND11_PLUGIN(_fastmath_ext) {
     py::module m("_fastmath_ext");
-    m.def("inv3", &inv3);
+    m.def("inv3", &inv3<float>);
+    m.def("inv3", &inv3<double>);
 
     return m.ptr();
 }
