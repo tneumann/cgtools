@@ -1,5 +1,6 @@
 import numpy as np
 from scipy import weave
+import _fastmath_ext
 
 
 __all__ = ['matmat', 'matvec']
@@ -18,31 +19,18 @@ def matmat(a, b):
     if a.ndim == 2 and b.ndim == 2:
         # just a single matrix vector multiplication, no need to use blitzdot here
         return np.dot(a, b)
-    if a.ndim == 2:
-        a = a[np.newaxis]
-    if b.ndim == 2:
-        b = b[np.newaxis]
-    if a.shape[2] != b.shape[1]:
-        raise ValueError, "arrays must have suitable shape for matrix multiplication"
+    if a.ndim == 2 and b.ndim == 3:
+        # a is just a single matrix
+        return np.dot(b.swapaxes(-1, -2), a.T).swapaxes(-1, -2)
+    if a.ndim == 3 and b.ndim == 2:
+        # b is just a single matrix
+        return np.dot(a, b)
     if a.ndim != b.ndim != 3:
         raise ValueError, "both arrays are expected to be arrays of 2d matrices (thus, should have 3 dimensions)"
-    code = """
-        using namespace blitz;
-        firstIndex i;
-        secondIndex j;
-        thirdIndex k;
-        fourthIndex l;
-        result = sum(a(i,j,l) * b(i,l,k), l);
+    if a.shape[2] != b.shape[1]:
+        raise ValueError, "arrays must have suitable shape for matrix multiplication"
+    return _fastmath_ext.matmat(a, b)
 
-    """
-    result = np.empty((max(a.shape[0], b.shape[0]), 
-                       a.shape[1], b.shape[2]), np.promote_types(a.dtype, b.dtype))
-    weave.inline(code,
-                 ["a", "b", "result"],
-                 type_converters=weave.converters.blitz,
-                 extra_compile_args=['-w'],
-                 )
-    return result
 
 def matvec(matrices, vectors):
     """

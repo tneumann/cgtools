@@ -1,8 +1,10 @@
 #include <iostream>
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
+#include <Eigen/Dense>
 
 namespace py = pybind11;
+using namespace Eigen;
 
 
 template<typename float_t>
@@ -67,12 +69,40 @@ py::array_t<float_t> inv2(py::array_t<float_t, py::array::c_style> & Ts)
     return result;
 }
 
+template<typename float_t>
+py::array_t<float_t> matmat(
+        py::array_t<float_t, py::array::c_style> & a,
+        py::array_t<float_t, py::array::c_style> & b
+    )
+{
+    auto a_buf = a.request();
+    float_t *p_a = (float_t*)a_buf.ptr;
+    auto b_buf = b.request();
+    float_t *p_b = (float_t*)b_buf.ptr;
+
+    auto result = py::array_t<float_t, py::array::c_style>(
+            std::vector<size_t>({{a_buf.shape[0], a_buf.shape[1], b_buf.shape[2]}}) );
+    auto result_buf = result.request();
+
+    typedef Matrix<float_t, Dynamic, Dynamic, RowMajor> MatrixT;
+    for (size_t idx = 0; idx < a_buf.shape[0]; idx++) {
+        Map<const MatrixT> a_i(a.data(idx, 0, 0), a_buf.shape[1], a_buf.shape[2]);
+        Map<const MatrixT> b_i(b.data(idx, 0, 0), b_buf.shape[1], b_buf.shape[2]);
+        Map<MatrixT> r_i(result.mutable_data(idx, 0, 0), result_buf.shape[1], result_buf.shape[2]);
+        r_i = a_i * b_i;
+    }
+
+    return result;
+}
+
+
 PYBIND11_PLUGIN(_fastmath_ext) {
     py::module m("_fastmath_ext");
     m.def("inv3", &inv3<float>);
     m.def("inv3", &inv3<double>);
     m.def("inv2", &inv2<float>);
     m.def("inv2", &inv2<double>);
+    m.def("matmat", &matmat<double>);
 
     return m.ptr();
 }
