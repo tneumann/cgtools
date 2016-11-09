@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import weave
-import _fastmath
+import _fastmath_ext
 
 __all__ = ['inv2', 'inv3']
 
@@ -10,7 +10,7 @@ def inv3(matrices):
         raise ValueError, "Can only invert 3x3 matrices"
     Ts = matrices.reshape((-1, 3, 3))
     # TODO: cython function is not specialized for float32 - maybe use fused types?
-    Qs = _fastmath.inv3(Ts.astype(np.float64))
+    Qs = _fastmath_ext.inv3(Ts)
     return Qs.reshape(matrices.shape).astype(matrices.dtype)
 
 def inv2(matrices):
