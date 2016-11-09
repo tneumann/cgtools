@@ -95,6 +95,38 @@ py::array_t<float_t> matmat(
     return result;
 }
 
+template<typename float_t>
+py::array_t<float_t> matvec(
+        py::array_t<float_t, py::array::c_style> & mats,
+        py::array_t<float_t, py::array::c_style> & vecs
+    )
+{
+    auto mats_buf = mats.request();
+    float_t *p_mats = (float_t*)mats_buf.ptr;
+    auto vecs_buf = vecs.request();
+    float_t *p_vecs = (float_t*)vecs_buf.ptr;
+
+    auto result = py::array_t<float_t, py::array::c_style>(
+            std::vector<size_t>({{mats_buf.shape[0], mats_buf.shape[1]}}) );
+    auto result_buf = result.request();
+    float_t *p_res = (float_t*)result_buf.ptr;
+
+    const size_t mat_stride1 = mats_buf.strides[1] / sizeof(float_t);
+    for (size_t idx = 0; idx < mats_buf.shape[0]; idx++) {
+        for (size_t row = 0; row < mats_buf.shape[1]; row++) {
+            float_t sum = 0.0;
+            for (size_t k = 0; k < mats_buf.shape[2]; k++) {
+                sum += *(p_mats++) * p_vecs[k];
+            }
+            *p_res = sum;
+            p_res++;
+        }
+        p_vecs += vecs_buf.shape[1];
+    }
+
+    return result;
+}
+
 
 PYBIND11_PLUGIN(_fastmath_ext) {
     py::module m("_fastmath_ext");
@@ -103,6 +135,7 @@ PYBIND11_PLUGIN(_fastmath_ext) {
     m.def("inv2", &inv2<float>);
     m.def("inv2", &inv2<double>);
     m.def("matmat", &matmat<double>);
+    m.def("matvec", &matvec<double>);
 
     return m.ptr();
 }

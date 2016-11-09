@@ -49,31 +49,18 @@ def matvec(matrices, vectors):
         # just a single matrix vector multiplication, no need to use blitzdot here
         return np.dot(matrices, vectors)
     if matrices.ndim == 2:
-        matrices = matrices[np.newaxis]
+        # just a single matrix multiplied by multiple vectors - use numpy.dot
+        return np.dot(matrices, vectors.T).T
     if vectors.ndim == 1:
-        vectors = vectors[np.newaxis]
+        # multiple matrices multiplied by a single vector - use numpy.dot
+        return np.dot(matrices, vectors)
     if matrices.ndim != 3:
         raise ValueError, "the matrices argument is expected to be an array of multiple matrices (thus, should have 3 dimensions)"
     if vectors.ndim != 2:
         raise ValueError, "the vectors argument is expected to be an array of multiple vectors (thus, should have 2 dimensions)"
     if matrices.shape[-1] != vectors.shape[-1]:
         raise ValueError, "matrices and vectors must be compatible for matrix-vector multiplication"
-    code = """
-        using namespace blitz;
-        firstIndex i;
-        secondIndex j;
-        thirdIndex k;
-        fourthIndex l;
-        result = sum(matrices(i,j,k) * vectors(i,k), k);
-
-    """
-    result = np.empty((max(matrices.shape[0], vectors.shape[0]), matrices.shape[1]),
-                      np.promote_types(matrices.dtype, vectors.dtype))
-    weave.inline(code,
-                 ["matrices", "vectors", "result"],
-                 type_converters=weave.converters.blitz,
-                 extra_compile_args=['-w'])
-    return result
+    return _fastmath_ext.matvec(matrices, vectors)
 
 
 if __name__ == '__main__':
@@ -84,11 +71,27 @@ if __name__ == '__main__':
         matmat(a, b)
     def t_matmat_np():
         np.array(map(np.dot, a, b))
-    print "blitzdot:", 
+    print "matmat"
+    print "c++:", 
     speed1 = np.mean(timeit.repeat(t_matmat, repeat=5, number=100))
     print speed1
     print "numpy:", 
     speed2 = np.mean(timeit.repeat(t_matmat_np, repeat=5, number=100))
+    print speed2
+    print "speedup %.2f" % np.mean(speed2 / speed1)
+
+    a = np.random.random((10000, 4, 4))
+    b = np.random.random((10000, 4))
+    def t_matvec():
+        matvec(a, b)
+    def t_matvec_np():
+        np.array(map(np.dot, a, b))
+    print "matvec"
+    print "c++:", 
+    speed1 = np.mean(timeit.repeat(t_matvec, repeat=5, number=100))
+    print speed1
+    print "numpy:", 
+    speed2 = np.mean(timeit.repeat(t_matvec_np, repeat=5, number=100))
     print speed2
     print "speedup %.2f" % np.mean(speed2 / speed1)
 
