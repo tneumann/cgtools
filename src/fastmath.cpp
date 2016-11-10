@@ -1,10 +1,8 @@
 #include <iostream>
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
-#include <Eigen/Dense>
 
 namespace py = pybind11;
-using namespace Eigen;
 
 
 template<typename float_t>
@@ -83,13 +81,28 @@ py::array_t<float_t> matmat(
     auto result = py::array_t<float_t, py::array::c_style>(
             std::vector<size_t>({{a_buf.shape[0], a_buf.shape[1], b_buf.shape[2]}}) );
     auto result_buf = result.request();
+    float_t *p_res = (float_t*)result_buf.ptr;
 
-    typedef Matrix<float_t, Dynamic, Dynamic, RowMajor> MatrixT;
+    const size_t n_rows_a = a_buf.shape[1];
+    const size_t n_cols_a = a_buf.shape[2];
+    const size_t n_rows_b = b_buf.shape[1];
+    const size_t n_cols_b = b_buf.shape[2];
+    assert(n_cols_a == n_rows_b);
     for (size_t idx = 0; idx < a_buf.shape[0]; idx++) {
-        Map<const MatrixT> a_i(a.data(idx, 0, 0), a_buf.shape[1], a_buf.shape[2]);
-        Map<const MatrixT> b_i(b.data(idx, 0, 0), b_buf.shape[1], b_buf.shape[2]);
-        Map<MatrixT> r_i(result.mutable_data(idx, 0, 0), result_buf.shape[1], result_buf.shape[2]);
-        r_i = a_i * b_i;
+        for (size_t row_a = 0; row_a < n_rows_a; row_a++) {
+            for (size_t col_b = 0; col_b < n_cols_b; col_b++) {
+                float_t sum = 0.0;
+                for (size_t k = 0; k < n_cols_a; k++) {
+                    const float_t ai = p_a[row_a * n_cols_a + k];
+                    const float_t bi = p_b[k * n_cols_b + col_b];
+                    sum += ai * bi;
+                }
+                *p_res = sum;
+                p_res++;
+            }
+        }
+        p_a += n_cols_a * n_rows_a;
+        p_b += n_cols_b * n_rows_b;
     }
 
     return result;
