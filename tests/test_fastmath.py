@@ -21,6 +21,37 @@ def test_matmat_eqshape():
     r2 = np.array(map(np.dot, a, b))
     np.testing.assert_allclose(r1, r2)
 
+def test_matmat_ndim():
+    a = np.random.random((10, 11, 2, 4))
+    b = np.random.random((10, 11, 4, 3))
+    r1 = matmat(a, b)
+    r2 = np.array(map(np.dot, a.reshape(-1, 2, 4), b.reshape(-1, 4, 3))).reshape(10, 11, 2, 3)
+    np.testing.assert_allclose(r1, r2)
+
+def test_matmat_noncontiguous():
+    # a non-contiguous
+    a = np.random.random((10, 3, 3)).swapaxes(1, 2)
+    b = np.random.random((10, 3, 3))
+    assert not a.flags.contiguous
+    r1 = matmat(a, b)
+    r2 = np.array(map(np.dot, a, b))
+    np.testing.assert_allclose(r1, r2)
+    # b non-contiguous
+    a = np.random.random((10, 3, 4))
+    b = np.random.random((10, 3, 4)).swapaxes(1, 2)
+    assert not b.flags.contiguous
+    r1 = matmat(a, b)
+    r2 = np.array(map(np.dot, a, b))
+    np.testing.assert_allclose(r1, r2)
+    # both non-contiguous
+    a = np.random.random((10, 3, 5)).swapaxes(1, 2)
+    b = np.random.random((10, 6, 3)).swapaxes(1, 2)
+    assert not a.flags.contiguous
+    assert not b.flags.contiguous
+    r1 = matmat(a, b)
+    r2 = np.array(map(np.dot, a, b))
+    np.testing.assert_allclose(r1, r2)
+
 def test_matvec_stride0():
     a = np.random.random((10, 3, 5))
     b = np.random.random(5)
