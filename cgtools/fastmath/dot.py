@@ -24,8 +24,6 @@ def matmat(a, b):
     if a.ndim == 3 and b.ndim == 2:
         # b is just a single matrix
         return np.dot(a, b)
-    if a.ndim != b.ndim != 3:
-        raise ValueError, "both arrays are expected to be arrays of 2d matrices (thus, should have 3 dimensions)"
     if a.shape[-1] != b.shape[-2]:
         raise ValueError, "arrays must have suitable shape for matrix multiplication"
     a_contig = a.reshape(-1, a.shape[-2], a.shape[-1])
@@ -55,13 +53,11 @@ def matvec(matrices, vectors):
     if vectors.ndim == 1:
         # multiple matrices multiplied by a single vector - use numpy.dot
         return np.dot(matrices, vectors)
-    if matrices.ndim != 3:
-        raise ValueError, "the matrices argument is expected to be an array of multiple matrices (thus, should have 3 dimensions)"
-    if vectors.ndim != 2:
-        raise ValueError, "the vectors argument is expected to be an array of multiple vectors (thus, should have 2 dimensions)"
     if matrices.shape[-1] != vectors.shape[-1]:
         raise ValueError, "matrices and vectors must be compatible for matrix-vector multiplication"
-    return _fastmath_ext.matvec(matrices, vectors)
+    matrices_contig = matrices.reshape(-1, matrices.shape[-2], matrices.shape[-1])
+    vectors_contig = vectors.reshape(-1, vectors.shape[-1])
+    return _fastmath_ext.matvec(matrices_contig, vectors_contig).reshape(matrices.shape[:-2] + (matrices.shape[-2], ))
 
 
 if __name__ == '__main__':

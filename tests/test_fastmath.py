@@ -71,6 +71,13 @@ def test_matvec_eqshape():
     r2 = np.array(map(np.dot, a, b))
     np.testing.assert_allclose(r1, r2)
 
+def test_matvec_ndim():
+    a = np.random.random((10, 31, 4, 5))
+    b = np.random.random((10, 31, 5))
+    r1 = matvec(a, b)
+    r2 = np.array(map(np.dot, a.reshape(-1, 4, 5), b.reshape(-1, 5))).reshape(10, 31, 4)
+    np.testing.assert_allclose(r1, r2)
+
 def test_matvec_single():
     a = np.random.random((3, 3))
     b = np.random.random(3)
