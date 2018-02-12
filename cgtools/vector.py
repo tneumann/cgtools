@@ -145,3 +145,6 @@ def convert_3x4_to_4x4(matrices, new_row=[0, 0, 0, 1]):
     """
     assert matrices.shape[-1] == 4 and matrices.shape[-2] == 3
     return np.insert(matrices, 3, new_row, axis=-2)
+
+to_4x4 = convert_3x4_to_4x4
+
