@@ -4,6 +4,7 @@ __all__ = [
     'normalized', 'veclen', 'sq_veclen', 'scaled', 'dot', 'project',
     'homogenize', 'dehomogenize', 'hom', 'dehom', 'ensure_dim', 'hom3', 'hom4',
     'transform',
+    'convert_3x4_to_4x4', 'to_4x4', 'assemble_4x4',
 ]
 
 ARR = np.asanyarray
@@ -147,4 +148,44 @@ def convert_3x4_to_4x4(matrices, new_row=[0, 0, 0, 1]):
     return np.insert(matrices, 3, new_row, axis=-2)
 
 to_4x4 = convert_3x4_to_4x4
+
+def assemble_4x4(rotations, translations, new_row=[0, 0, 0, 1]):
+    """
+    Given one (or more) 3x3 matrices and one (or more) 3d vectors,
+    create an array of 4x4 matrices
+
+    >>> rots = np.arange(9).reshape(3, 3)
+    >>> ts = np.array([99, 88, 77])
+    >>> assemble_4x4(rots, ts)
+    array([[ 0,  1,  2, 99],
+           [ 3,  4,  5, 88],
+           [ 6,  7,  8, 77],
+           [ 0,  0,  0,  1]])
+
+    >>> rots = np.random.random((100, 3, 3))
+    >>> ts = np.random.random((100, 3))
+    >>> Ms = assemble_4x4(rots, ts)
+    >>> Ms.shape
+    (100, 4, 4)
+    >>> np.all(Ms[:, :3, :3] == rots)
+    True
+    >>> np.all(Ms[:, :3, 3] == ts)
+    True
+    >>> np.all(Ms[:, 3, :] == np.array([0, 0, 0, 1]))
+    True
+    """
+    if rotations.ndim not in [2, 3] or rotations.shape[-2:] != (3, 3):
+        raise ValueError("requires rotations argument to be one or more 3x3 matrices, so the shape should be either (3, 3) or (n, 3, 3)")
+    if translations.ndim not in [1, 2] or translations.shape[-1] != 3:
+        raise ValueError("requires translations argument to be one or more 3d vectors, so the shape should be either (3,) or (n, 3)")
+    if rotations.ndim == 2 and translations.ndim == 1:
+        # single translation, single rotation -> output single matrix
+        return to_4x4(np.column_stack((rotations, translations)), new_row=new_row)
+    else:
+        if rotations.ndim == 2:
+            rotations = rotations[np.newaxis]
+        if translations.ndim == 1:
+            translations = translations[np.newaxis]
+        translations = translations[:, :, np.newaxis]
+        return to_4x4(np.concatenate((rotations, translations), axis=-1), new_row=new_row)
 
