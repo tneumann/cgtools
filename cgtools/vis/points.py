@@ -27,7 +27,7 @@ def vispoints(pts, point_colors=None, point_size=5., mode='2dvertex', **kwargs):
         mode=mode, **kwargs)
     if mode == '2dvertex':
         v.actor.property.point_size = point_size
-    if point_colors != None:
+    if point_colors is not None:
         v.glyph.glyph.input.point_data.scalars = point_colors.astype(np.uint8)
     return v
 
