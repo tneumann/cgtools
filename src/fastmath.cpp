@@ -79,7 +79,7 @@ py::array_t<float_t> matmat(
     float_t *p_b = (float_t*)b_buf.ptr;
 
     auto result = py::array_t<float_t, py::array::c_style>(
-            std::vector<size_t>({{a_buf.shape[0], a_buf.shape[1], b_buf.shape[2]}}) );
+            {a_buf.shape[0], a_buf.shape[1], b_buf.shape[2]});
     auto result_buf = result.request();
     float_t *p_res = (float_t*)result_buf.ptr;
 
@@ -119,8 +119,7 @@ py::array_t<float_t> matvec(
     auto vecs_buf = vecs.request();
     float_t *p_vecs = (float_t*)vecs_buf.ptr;
 
-    auto result = py::array_t<float_t, py::array::c_style>(
-            std::vector<size_t>({{mats_buf.shape[0], mats_buf.shape[1]}}) );
+    auto result = py::array_t<float_t, py::array::c_style>({mats_buf.shape[0], mats_buf.shape[1]});
     auto result_buf = result.request();
     float_t *p_res = (float_t*)result_buf.ptr;
 
@@ -152,7 +151,7 @@ py::array_t<float_t> cross3(
     float_t *p_b = (float_t*)b_buf.ptr;
 
     auto result = py::array_t<float_t, py::array::c_style>(
-            std::vector<size_t>({{a_buf.shape[0], a_buf.shape[1]}}) );
+            {a_buf.shape[0], a_buf.shape[1]});
     auto result_buf = result.request();
     float_t *p_res = (float_t*)result_buf.ptr;
 
