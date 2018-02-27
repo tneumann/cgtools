@@ -113,8 +113,8 @@ def valid_indices(indices, array_shape, return_mask=False):
 
     Can also return the mask which indices would be selected:
 
-    >>> valid_indices(idx, (2, 2), return_mask=True)[1]
-    array([ True, False, False,  True, False], dtype=bool)
+    >>> valid_indices(idx, (2, 2), return_mask=True)[1] # doctest: +ELLIPSIS
+    array([ True, False, False,  True, False]...)
 
     >>> valid_indices(np.random.randint(0, 2, (10, 3, 2)), 2)
     Traceback (most recent call last):
