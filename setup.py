@@ -32,6 +32,15 @@ ext_modules = [
         ],
         language='c++'
     ),
+    Extension(
+        'cgtools.mesh._intersections_ext',
+        ['src/intersections.cpp'],
+        include_dirs=[
+            'include',
+            numpy.get_include(),
+        ],
+        language='c++'
+    ),
 ]
 
 
