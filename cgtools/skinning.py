@@ -1,5 +1,4 @@
 import numpy as np
-from scipy import weave
 import vector as V
 
 
@@ -41,6 +40,8 @@ def dualquats_to_rbms(blendq):
     return M
 
 def dq_skinning(pts, BW, dqs):
+    from scipy import weave
+
     blendq = np.sum(BW[:,:,np.newaxis] * dqs[np.newaxis], axis=1)
     code = """
     using namespace blitz;
