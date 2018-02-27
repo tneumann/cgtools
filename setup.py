@@ -108,6 +108,6 @@ setup(
     install_requires=['numpy'],
     cmdclass={'build_ext': BuildExt},
     ext_modules = ext_modules,
-    packages = ['cgtools', 'cgtools.fastmath', 'cgtools.io', 'cgtools.vis'],
+    packages = ['cgtools', 'cgtools.fastmath', 'cgtools.io', 'cgtools.vis', 'cgtools.mesh'],
 )
 
