@@ -1,6 +1,9 @@
+from __future__ import absolute_import
+
 import numpy as np
 import scipy.sparse as sparse
-from icgtools import vector as V
+
+from .. import vector as V
 
 
 def compute_mesh_laplacian(verts, tris, weight_type='cotangent',
