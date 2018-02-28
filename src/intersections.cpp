@@ -88,9 +88,9 @@ rayMeshIntersect(
 
     return std::make_tuple(
             py::array_t<int>(hitTris.size(), hitTris.data()),
-            py::array_t<double>({hitUVs.size(), 2ul}, (double*)hitUVs.data()),
+            py::array_t<double>({(unsigned long)hitUVs.size(), 2ul}, (double*)hitUVs.data()),
             py::array_t<int>(hitRayIndices.size(), hitRayIndices.data()),
-            py::array_t<double>({hitPoints.size(), 3ul}, (double*)hitPoints.data())
+            py::array_t<double>({(unsigned long)hitPoints.size(), 3ul}, (double*)hitPoints.data())
     );
 }
 
