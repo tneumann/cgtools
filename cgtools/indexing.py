@@ -157,3 +157,17 @@ def valid_indices(indices, array_shape, return_mask=False):
     else:
         return indices_masked
 
+def mask_from_indices(ix, count=None):
+    """
+    Given an array of 1d indices, return a mask array that has all those indices
+    set to True, and the remaining indices set to False.
+    The returned mask has size of given count, or if count == None, 
+    the length corresponds to the maximum element in ix.
+
+    >>> mask_from_indices([1, 3]) # doctest: +NORMALIZE_WHITESPACE
+    array([False, True, False, True]...)
+    >>> mask_from_indices([1, 3], 5) # doctest: +NORMALIZE_WHITESPACE
+    array([False, True, False, True, False]...)
+
+    """
+    return (np.bincount(ix, minlength=count) != 0)
