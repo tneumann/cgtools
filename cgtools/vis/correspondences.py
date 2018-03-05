@@ -2,10 +2,7 @@ import numpy as np
 from traits.api import Range, HasTraits
 from mayavi import mlab
 from tvtk.api import tvtk
-from traits.api import Instance
-from traitsui.api import View, Item, HGroup, Group
-from tvtk.pyface.scene_editor import SceneEditor
-from mayavi.tools.mlab_scene_model import MlabSceneModel
+from traitsui.api import View, Item
 
 
 def visualize_point_correspondences(source_pts, target_pts, ij_corr=None, scalars=None):
@@ -42,7 +39,9 @@ def visualize_point_correspondences(source_pts, target_pts, ij_corr=None, scalar
 class Morpher(HasTraits):
     alpha = Range(0.0, 1.0)
 
-    def __init__(self, verts1, verts2, tris=None, as_points=False, scalars=None):
+    def __init__(self, verts1, verts2, tris=None, as_points=False, scalars=None,
+                 actor_property=dict(specular=0.1, specular_power=128., diffuse=0.5),
+                 ):
         if tris is None:
             as_points = True
         HasTraits.__init__(self)
@@ -69,16 +68,35 @@ class Morpher(HasTraits):
             self._actor.mapper.scalar_range = (scalars.min(), scalars.max())
             self._actor.mapper.lookup_table.hue_range = (0.33, 0)
         else:
-            self._actor.property.set(
-                #edge_visibility=True,
-                specular=0.1, specular_power=128., shading=True, diffuse=0.5)
+            self._actor.property.set(**actor_property)
         mlab.gcf().scene.add_actor(self._actor)
 
     def _alpha_changed(self):
         self._polydata.points = self._verts1 * (1 - self.alpha) + self._verts2 * self.alpha
         mlab.gcf().scene.render()
 
+    traits_view = View(Item('alpha', show_label=False), title='cgtools Morpher')
+
 
 def visualize_mesh_morph(verts1, verts2, tris=None, **kwargs):
     Morpher(verts1, verts2, tris, **kwargs).configure_traits()
 
+
+if __name__ == "__main__":
+    x, y = map(np.ravel, np.mgrid[:10:20j, :10:20j])
+    z1 = np.sin(0.5 * x) + np.cos(1.2 * y)
+    z2 = -0.5 * np.sin(0.4 * x) + 0.5 * np.cos(1.0 * y)
+    ix = np.arange(len(x)).reshape(20, 20)
+    quads = np.column_stack(map(np.ravel, [ix[:-1, :-1], 
+                                           ix[ 1:, :-1], 
+                                           ix[ 1:, 1:], 
+                                           ix[:-1, 1:]]))
+    tris = quads[:, [0, 1, 2,  2, 3, 0]].reshape(-1, 3)
+
+    visualize_mesh_morph(
+        np.column_stack((x, y, z1)), 
+        np.column_stack((x, y, z2)), 
+        quads,
+        actor_property={'edge_visibility': True},
+    )
+    
