@@ -109,5 +109,11 @@ setup(
     cmdclass={'build_ext': BuildExt},
     ext_modules = ext_modules,
     packages = ['cgtools', 'cgtools.fastmath', 'cgtools.io', 'cgtools.vis', 'cgtools.mesh'],
+    setup_requires=[
+        'pytest-runner',
+    ],
+    tests_require=[
+        'pytest', 
+    ],
 )
 
