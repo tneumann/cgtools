@@ -2,6 +2,7 @@ import numpy as np
 from traits.api import Range, HasTraits
 from mayavi import mlab
 from tvtk.api import tvtk
+from tvtk.common import configure_input_data, configure_input
 from traitsui.api import View, Item
 
 
@@ -52,12 +53,9 @@ class Morpher(HasTraits):
         else:
             self._polydata.polys = tris
         n = tvtk.PolyDataNormals(splitting=False)
-        if hasattr(n, 'set_input_data'):
-            n.set_input_data(self._polydata)
-            self._actor = tvtk.Actor(mapper=tvtk.PolyDataMapper(input_connection=n.output_port))
-        else:
-            n.input = self._polydata
-            self._actor = tvtk.Actor(mapper=tvtk.PolyDataMapper(input=n.output))
+        configure_input_data(n, self._polydata)
+        self._actor = tvtk.Actor(mapper=tvtk.PolyDataMapper())
+        configure_input(self._actor.mapper, n)
         if as_points:
             self._actor.property.set(representation='points', point_size=5)
         if as_points and scalars is None:
