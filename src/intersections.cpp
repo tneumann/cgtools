@@ -16,7 +16,8 @@ rayMeshIntersect(
         py::array_t<double> ray_pts_in, 
         py::array_t<double> ray_dirs_in, 
         double max_distance, 
-        double max_angle) 
+        double max_angle,
+        bool allow_backface_hit) 
 {
     auto verts = verts_in.unchecked<2>();
     auto tris = tris_in.unchecked<2>();
@@ -71,7 +72,12 @@ rayMeshIntersect(
                 bestTri = itri;
                 best_t = t;
                 Vec3d normal = edge1.normalized().cross(edge2.normalized()).normalized();
-                bestAngleCos = fmax(rayDirNorm.dot(normal), rayDirNorm.dot(normal * -1.f));
+                if (allow_backface_hit) {
+                    bestAngleCos = fmax(rayDirNorm.dot(normal), rayDirNorm.dot(normal * -1.f));
+                }
+                else {
+                    bestAngleCos = rayDirNorm.dot(normal);
+                }
             }
         }
         if(bestTri > -1) {
@@ -102,7 +108,8 @@ PYBIND11_PLUGIN(_intersections_ext) {
     m.def("ray_mesh_intersect", &rayMeshIntersect,
             "verts"_a, "tris"_a, "ray_pts"_a, "ray_dirs"_a,
             "max_distance"_a = std::numeric_limits<double>::infinity(),
-            "max_angle"_a = std::numeric_limits<double>::infinity()
+            "max_angle"_a = std::numeric_limits<double>::infinity(),
+            "allow_backface_hit"_a = true
             );
 
     return m.ptr();
