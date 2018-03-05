@@ -19,10 +19,10 @@ py::array_t<float_t> inv3(py::array_t<float_t, py::array::c_style> & Ts)
         const float_t T00 = pT[0], T01 = pT[1], T02 = pT[2];
         const float_t T10 = pT[3], T11 = pT[4], T12 = pT[5];
         const float_t T20 = pT[6], T21 = pT[7], T22 = pT[8];
-        const double det = T00 * (T22 * T11 - T21 * T12) \
+        const float_t det = T00 * (T22 * T11 - T21 * T12) \
                          - T10 * (T22 * T01 - T21 * T02) \
                          + T20 * (T12 * T01 - T11 * T02);
-        const double invDet = 1. / det;
+        const float_t invDet = 1. / det;
         pR[0] =  (T11 * T22 - T21 * T12) * invDet;
         pR[1] = -(T01 * T22 - T02 * T21) * invDet;
         pR[2] =  (T01 * T12 - T02 * T11) * invDet;
@@ -53,8 +53,8 @@ py::array_t<float_t> inv2(py::array_t<float_t, py::array::c_style> & Ts)
     for (size_t idx = 0; idx < Ts_buf.shape[0]; idx++) {
         const float_t T00 = pT[0], T01 = pT[1];
         const float_t T10 = pT[2], T11 = pT[3];
-        const double det = T00 * T11 - T01 * T10;
-        const double invDet = 1. / det;
+        const float_t det = T00 * T11 - T01 * T10;
+        const float_t invDet = 1. / det;
         pR[0] =  T11 * invDet;
         pR[1] = -1 * T01 * invDet;
         pR[2] = -1 * T10 * invDet;

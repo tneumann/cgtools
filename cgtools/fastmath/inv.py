@@ -21,16 +21,17 @@ def inv2(matrices):
 
 if __name__ == '__main__':
     import timeit
-    a = np.random.random((1000, 3, 3))
-    def t_inv3():
-        inv3(a)
-    def t_inv3_np():
-        np.array(map(np.linalg.inv, a))
-    print "cython:", 
-    speed1 = np.mean(timeit.repeat(t_inv3, repeat=5, number=100))
-    print speed1
-    print "numpy:", 
-    speed2 = np.mean(timeit.repeat(t_inv3_np, repeat=5, number=100))
-    print speed2
-    print "speedup %.2f" % np.mean(speed2 / speed1)
+    for dim in [2, 3]:
+        print("testing inv%d" % dim)
+        a = np.random.random((1000, dim, dim))
+        inv_func = inv2 if dim == 2 else inv3
+        def t_cgtools():
+            inv_func(a)
+        def t_np():
+            np.array(map(np.linalg.inv, a))
+        speed1 = np.mean(timeit.repeat(t_cgtools, repeat=5, number=100))
+        print("  cgtools: %f" % speed1)
+        speed2 = np.mean(timeit.repeat(t_np, repeat=5, number=100))
+        print("  numpy: %f" % speed2)
+        print("  speedup %.2f" % np.mean(speed2 / speed1))
 
