@@ -8,9 +8,14 @@ from tvtk.pyface.scene_editor import SceneEditor
 from mayavi.tools.mlab_scene_model import MlabSceneModel
 
 
-def visualize_point_correspondences(pts3d_1, pts3d_2, ij_corr, scalars=None):
-    p = pts3d_1[ij_corr[:,0]]
-    p2 = pts3d_2[ij_corr[:,1]]
+def visualize_point_correspondences(source_pts, target_pts, ij_corr=None, scalars=None):
+    if ij_corr is None:
+        if source_pts.shape != target_pts.shape:
+            raise ValueError("must have same amount of source and target points, or specify ij_corr parameter")
+        ij_corr = np.column_stack((np.arange(len(source_pts)), np.arange(len(target_pts))))
+
+    p = source_pts[ij_corr[:,0]]
+    p2 = target_pts[ij_corr[:,1]]
 
     pd = tvtk.PolyData(points=p, verts=np.r_[:len(p)].reshape((-1,1)))
     #pd = tvtk.PolyData(points=p, polys=np.arange(len(p)).reshape((-1, 3)))
