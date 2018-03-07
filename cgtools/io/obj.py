@@ -11,6 +11,16 @@ _normal_regex = re.compile("^vn\s+(\S+)\s+(\S+)\s+(\S+)", re.MULTILINE)
 _texcoord_regex = re.compile("^vt\s+(\S+)\s+(\S+)", re.MULTILINE)
 _vertex_regex = re.compile("^v\s+(\S+)\s+(\S+)\s+(\S+)", re.MULTILINE)
 
+
+def _array_fromregex(f, regex, dtype):
+    # could use np.fromregex but that has a bug in some versions of numpy
+    # that is caused when called with a compiled regex object
+    # see https://github.com/numpy/numpy/pull/10501
+    content = f.read()
+    seq = regex.findall(content)
+    return np.array(seq, dtype=dtype)
+
+
 def load_obj(filename, load_normals=False, load_texcoords=False, load_texture=False, 
              load_full_face_definitions=False, is_quadmesh=False):
     """ load a wavefront obj file
@@ -18,16 +28,16 @@ def load_obj(filename, load_normals=False, load_texcoords=False, load_texture=Fa
         into a n x 3 index array 
         only loads obj files vertex positions and also
         only works with triangle or (when is_quadmesh=True) with quad meshes """
-    vertices = np.fromregex(open(filename), _vertex_regex, np.float)
+    vertices = _array_fromregex(open(filename), _vertex_regex, np.float)
     if load_normals:
-        normals = np.fromregex(open(filename), _normal_regex, np.float)
+        normals = _array_fromregex(open(filename), _normal_regex, np.float)
     if load_texcoords:
-        texcoords = np.fromregex(open(filename), _texcoord_regex, np.float)
+        texcoords = _array_fromregex(open(filename), _texcoord_regex, np.float)
     if is_quadmesh:
         reg = _quad_regex_all if load_full_face_definitions else _quad_regex
     else:
         reg = _triangle_regex_all if load_full_face_definitions else _triangle_regex
-    faces = np.fromregex(open(filename), reg, np.int) - 1 # 1-based indexing in obj file format!
+    faces = _array_fromregex(open(filename), reg, np.int) - 1 # 1-based indexing in obj file format!
 
     r = [vertices]
     if load_normals:
