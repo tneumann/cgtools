@@ -1,6 +1,8 @@
 import numpy as np
+from scipy import sparse
 from collections import defaultdict
 from itertools import izip, count
+
 
 def inverse_index_dict(_list):
     """ build a dict that maps items to their index in given _list
@@ -171,3 +173,23 @@ def mask_from_indices(ix, count=None):
 
     """
     return (np.bincount(ix, minlength=count) != 0)
+
+
+def sparse_indicator_matrix(ci, num_cols, omega=1.):
+    """ 
+    build a sparse constraint matrix C 
+    for each i in ci, a row is made in the matrix, and the i'th entry is set to omega (default=1)
+    such a matrix can be easily used in least squares problems, since C*x[ci] == x[ci]
+    omega is the value that is placed into the nonzero entries of the matrix
+    >>> x = np.array([4, 5, 6, 7, 8], np.float)
+    >>> C = sparse_indicator_matrix([1, 2, 4], 5)
+    >>> C * x # doctest: +NORMALIZE_WHITESPACE
+    array([5., 6., 8.]...)
+    """
+    ci = np.asanyarray(ci)
+    if ci.dtype == np.bool:
+        ci = ci.nonzero()[0]
+    data = np.ones(len(ci)) * omega
+    ij = (np.arange(len(ci)), ci)
+    return sparse.csr_matrix((data, ij), shape=(len(ci), num_cols))
+
