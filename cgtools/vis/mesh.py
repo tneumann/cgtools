@@ -1,21 +1,30 @@
 import numpy as np
 from mayavi import mlab
 from tvtk.api import tvtk
+from tvtk.common import configure_input, configure_input_data
+
 
 
 def mesh_as_vtk_actor(verts, tris, compute_normals=True, return_polydata=True, scalars=None):
     pd = tvtk.PolyData(points=verts, polys=tris)
     if scalars is not None:
         pd.point_data.scalars = scalars
-    if compute_normals:
-        normals = tvtk.PolyDataNormals(input=pd, splitting=False).output
-    else:
-        normals = pd
-    actor = tvtk.Actor(mapper=tvtk.PolyDataMapper(input=normals))
+    actor = polydata_actor(pd, compute_normals=compute_normals)
     if return_polydata:
         return actor, pd
     else:
         return actor
+
+def polydata_actor(polydata, compute_normals=True):
+    """ create a vtk actor with given polydata as input """
+    if compute_normals:
+        normals = tvtk.PolyDataNormals(splitting=False)
+        configure_input_data(normals, polydata)
+        polydata = normals
+    actor = tvtk.Actor(mapper=tvtk.PolyDataMapper())
+    configure_input(actor.mapper, polydata)
+    return actor
+
 
 def vismesh(pts, tris, color=None, edge_visibility=False, shader=None, triangle_scalars=None, colors=None, **kwargs):
     if 'scalars' in kwargs and np.asarray(kwargs['scalars']).ndim == 2:
