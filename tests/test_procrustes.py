@@ -5,9 +5,10 @@ from cgtools.procrustes import procrustes3d
 
 def test_procrustes3d():
     # test with 100 random rotations/translations
-    trials = 100
+    trials = 0
     while trials < 100:
         R = np.linalg.qr(np.random.uniform(-1, 1, size=(3,3)))[0]
+        print(np.linalg.det(R))
         if np.linalg.det(R) < 0:
             continue
         t = np.random.uniform(-2, 2, size=3)
@@ -19,6 +20,7 @@ def test_procrustes3d():
         topts = V.transform(frompts, M)
         M_est = procrustes3d(frompts, topts)
         np.testing.assert_allclose(M, M_est)
+        np.testing.assert_allclose(V.transform(frompts, M_est), topts)
         R = M_est[:3, :3]
         trials += 1
 

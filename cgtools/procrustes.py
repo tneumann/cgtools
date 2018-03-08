@@ -21,11 +21,11 @@ def procrustes3d(frompts, topts, allow_reflection=False):
     #    Vt[-1] *= -1
     #R = np.dot(U, Vt)
     if allow_reflection:
-        R = np.dot(Vt.T, U.T)
+        R = U.dot(Vt)
     else:
         d = np.sign(np.linalg.det(np.dot(Vt.T, U.T)))
         E = np.diag([1, 1, d])
-        R = np.dot(Vt.T, np.dot(E, U.T))
+        R = np.dot(U, np.dot(E, Vt))
     T0 = np.eye(4)
     T0[:3,:3] = R
     T0[:3, 3] = t1 - np.dot(R, t0)
