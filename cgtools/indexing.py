@@ -69,14 +69,14 @@ def filter_reindex(condition, target):
     
     You also have another array that consists of indices into this array
     >>> indices = np.array([0, 3, 3, 0])
-    >>> data[indices].tolist()
-    ['a', 'd', 'd', 'a']
+    >>> print(data[indices])
+    ['a' 'd' 'd' 'a']
 
     Now, say you are filtering some elements in your data array
     >>> condition = (data == 'a') | (data == 'd')
     >>> filtered_data = data[condition]
-    >>> filtered_data.tolist()
-    ['a', 'd']
+    >>> print(filtered_data)
+    ['a' 'd']
 
     The problem is that your index array doesn't correctly reference the new filtered data array
     >>> filtered_data[indices]
@@ -87,15 +87,15 @@ def filter_reindex(condition, target):
     Based on an old index array (target), this method returns a new index array 
     that re-indices into the data array as if condition was applied to this array, so
     >>> filtered_indices = filter_reindex(condition, indices)
-    >>> filtered_indices.tolist()
-    [0, 1, 1, 0]
-    >>> filtered_data[filtered_indices].tolist()
-    ['a', 'd', 'd', 'a']
+    >>> print(filtered_indices)
+    [0 1 1 0]
+    >>> print(filtered_data[filtered_indices])
+    ['a' 'd' 'd' 'a']
 
     >>> indices = np.array([1, 4, 1, 4])
     >>> condition = np.array([False, True, False, False, True])
-    >>> filter_reindex(condition, indices).tolist()
-    [0, 1, 0, 1]
+    >>> print(filter_reindex(condition, indices))
+    [0 1 0 1]
     """
     if condition.dtype != np.bool:
         raise ValueError, "condition must be a binary array"
@@ -115,8 +115,8 @@ def valid_indices(indices, array_shape, return_mask=False):
 
     Can also return the mask which indices would be selected:
 
-    >>> valid_indices(idx, (2, 2), return_mask=True)[1] # doctest: +ELLIPSIS
-    array([ True, False, False,  True, False]...)
+    >>> print(valid_indices(idx, (2, 2), return_mask=True)[1])
+    [ True False False  True False]
 
     >>> valid_indices(np.random.randint(0, 2, (10, 3, 2)), 2)
     Traceback (most recent call last):
@@ -162,14 +162,14 @@ def valid_indices(indices, array_shape, return_mask=False):
 def mask_from_indices(ix, count=None):
     """
     Given an array of 1d indices, return a mask array that has all those indices
-    set to True, and the remaining indices set to False.
+    set to True, and the remaining indices set to Failse.
     The returned mask has size of given count, or if count == None, 
     the length corresponds to the maximum element in ix.
 
-    >>> mask_from_indices([1, 3]) # doctest: +NORMALIZE_WHITESPACE
-    array([False, True, False, True]...)
-    >>> mask_from_indices([1, 3], 5) # doctest: +NORMALIZE_WHITESPACE
-    array([False, True, False, True, False]...)
+    >>> print(mask_from_indices([1, 3]))
+    [False True False True]
+    >>> print(mask_from_indices([1, 3], 5))
+    [False True False True False]
 
     """
     return (np.bincount(ix, minlength=count) != 0)
@@ -183,8 +183,8 @@ def sparse_indicator_matrix(ci, num_cols, omega=1.):
     omega is the value that is placed into the nonzero entries of the matrix
     >>> x = np.array([4, 5, 6, 7, 8], np.float)
     >>> C = sparse_indicator_matrix([1, 2, 4], 5)
-    >>> C * x # doctest: +NORMALIZE_WHITESPACE
-    array([5., 6., 8.]...)
+    >>> print(C * x)
+    [ 5. 6. 8.]
     """
     ci = np.asanyarray(ci)
     if ci.dtype == np.bool:
