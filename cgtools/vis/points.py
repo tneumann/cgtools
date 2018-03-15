@@ -1,6 +1,7 @@
 import numpy as np
 from mayavi import mlab
 from tvtk.api import tvtk
+from tvtk.common import configure_input
 
 
 def pointcloud_as_vtk_polydata(points, scalars=None, pt_colors=None, polydata=None):
@@ -16,7 +17,9 @@ def pointcloud_as_vtk_polydata(points, scalars=None, pt_colors=None, polydata=No
 
 def pointcloud_as_vtk_actor(points, pt_colors=None, point_size=5.0, alpha=1.0):
     pd = pointcloud_as_vtk_polydata(points, pt_colors)
-    actor = tvtk.Actor(mapper=tvtk.PolyDataMapper(input=pd))
+    mapper = tvtk.PolyDataMapper()
+    configure_input(mapper,pd)
+    actor = tvtk.Actor(mapper=mapper)
     actor.property.set(point_size=point_size, opacity=alpha)
     return pd, actor
 

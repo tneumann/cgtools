@@ -6,6 +6,7 @@ from pyface.timer.api import Timer
 from traits.api import HasTraits, Button, Instance, Range, Bool, Int, Directory, String, Tuple, Event, on_trait_change
 from traitsui.api import View, Group, Item, RangeEditor, HGroup, Tabbed, TupleEditor
 from pyface.api import ProgressDialog
+from tvtk.common import configure_input
 
 
 __all__ = [
@@ -212,8 +213,9 @@ class Animator(HasTraits):
             render = tvtk.WindowToImageFilter(input=renwin, magnification=1)#, input_buffer_type='rgba')
             if not self.fix_image_size:
                 render.magnification = self.magnification
-            exporter = tvtk.PNGWriter(input=render.output,
-                          file_name=path.join(self.render_directory, self.render_name_pattern % frame))
+            exporter = tvtk.PNGWriter(file_name=path.join(self.render_directory, self.render_name_pattern % frame))
+
+            configure_input(exporter,render)
             exporter.write()
             do_continue, skip = progress.update(frame - self.render_from_frame)
             if not do_continue:
