@@ -16,8 +16,8 @@ def visualize_point_correspondences(source_pts, target_pts, ij_corr=None, scalar
     p2 = target_pts[ij_corr[:,1]]
 
     pd = tvtk.PolyData(points=p, verts=np.r_[:len(p)].reshape((-1,1)))
-    #pd = tvtk.PolyData(points=p, polys=np.arange(len(p)).reshape((-1, 3)))
-    actor = tvtk.Actor(mapper=tvtk.PolyDataMapper(input=pd))
+    actor = tvtk.Actor(mapper=tvtk.PolyDataMapper())
+    configure_input_data(actor.mapper, pd)
     actor.property.point_size=10
     if scalars is not None:
         pd.point_data.scalars = scalars
