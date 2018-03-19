@@ -1,5 +1,9 @@
+from __future__ import absolute_import
+
 from collections import defaultdict
 import numpy as np
+
+from .. import vector as V
 
 
 def get_mesh_edges(verts, tris):
@@ -31,3 +35,17 @@ def get_edges_from_triangles(tris):
         np.maximum(all_edges[:,0], all_edges[:,1]) ))
     return np.array(list(set(map(tuple, all_edges))))
 
+
+def get_per_triangle_normals(tris, verts, edges_uv=None):
+    if edges_uv is None:
+        u, v = get_mesh_edges(tris, verts)
+    else:
+        u, v = edges_uv
+    return V.normalized(np.cross(u, v))
+
+
+def get_triangle_frames(triangles, verts, normals=None):
+    u, v = get_mesh_edges(triangles, verts)
+    # need the normal of each triangle
+    normals = normals if normals is not None else get_per_triangle_normals(triangles, verts, edges_uv=(u, v))
+    return np.dstack((u, v, normals)) # swapaxes???
