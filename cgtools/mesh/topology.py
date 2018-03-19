@@ -2,7 +2,7 @@ from collections import defaultdict
 import numpy as np
 
 
-def get_mesh_edges(tris, verts):
+def get_mesh_edges(verts, tris):
     u = verts[tris[:,1]] - verts[tris[:,0]]
     v = verts[tris[:,2]] - verts[tris[:,0]]
     return u, v

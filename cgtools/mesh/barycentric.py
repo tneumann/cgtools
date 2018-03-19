@@ -37,7 +37,7 @@ def barycentric_interpolate(verts, tris, uv):
 
         pb = p1 + u * (p2 - p1) + v * (p3 - p1)
     """
-    edge1, edge2 = get_mesh_edges(tris, verts)
+    edge1, edge2 = get_mesh_edges(verts, tris)
     return verts[tris[:,0]] + \
             uv[:,0][:,np.newaxis] * edge1 + \
             uv[:,1][:,np.newaxis] * edge2
