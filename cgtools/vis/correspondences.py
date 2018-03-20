@@ -33,9 +33,6 @@ def visualize_point_correspondences(source_pts, target_pts, ij_corr=None, scalar
 
     Ctrl().edit_traits()
 
-    mlab.show()
-
-
 
 class Morpher(HasTraits):
     alpha = Range(0.0, 1.0)
@@ -77,7 +74,7 @@ class Morpher(HasTraits):
 
 
 def visualize_mesh_morph(verts1, verts2, tris=None, **kwargs):
-    Morpher(verts1, verts2, tris, **kwargs).configure_traits()
+    Morpher(verts1, verts2, tris, **kwargs).edit_traits()
 
 
 if __name__ == "__main__":
