@@ -56,7 +56,6 @@ def vismesh(pts, tris, color=None, edge_visibility=False, shader=None, triangle_
 def compute_normals(pts, faces):
     pd = tvtk.PolyData(points=pts, polys=faces)
     n = tvtk.PolyDataNormals(splitting=False)
-    from tvtk.common import configure_input_data
     configure_input_data(n, pd)
     n.update()
     return n.output.point_data.normals.to_array()
