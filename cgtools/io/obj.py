@@ -6,6 +6,7 @@ import re
 _triangle_regex = re.compile("^f\s+([^\/\s]+)/?\S*/?\S*\s+([^\/\s]+)/?\S*/?\S*\s+([^\/\s]+)", re.MULTILINE)
 _quad_regex = re.compile("^f\s+(\d+)/?\S*/?\S*\s+(\d+)/?\S*/?\S*\s+(\d+)/?\S*/?\S*\s+(\d+)", re.MULTILINE)
 _triangle_regex_all = re.compile("^f\s+([^\/\s]+)/?([^\/\s]*)/?([^\/\s]*)\s+([^\/\s]+)/?([^\/\s]*)/?([^\/\s]*)\s+([^\/\s]+)/?([^\/\s]*)/?([^\/\s]*)", re.MULTILINE)
+_quad_regex_all = re.compile("f\s+(\d+)/?(\d+)?/?(\d+)?\s+(\d+)/?(\d+)?/?(\d+)?\s+(\d+)/?(\d+)?/?(\d+)?\s+(\d+)/?(\d+)?/?(\d+)?", re.MULTILINE)
 quad_regex_all = re.compile("^f\s+(\d+)/?(\d*)/?(\d*)\s+(\d+)/?(\d*)/?(\d*)\s+(\d+)/?(\d*)/?(\d*)\s+(\d+)/?(\d*)/?(\d*)", re.MULTILINE)
 _normal_regex = re.compile("^vn\s+(\S+)\s+(\S+)\s+(\S+)", re.MULTILINE)
 _texcoord_regex = re.compile("^vt\s+(\S+)\s+(\S+)", re.MULTILINE)
