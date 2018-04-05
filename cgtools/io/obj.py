@@ -11,6 +11,7 @@ quad_regex_all = re.compile("^f\s+(\d+)/?(\d*)/?(\d*)\s+(\d+)/?(\d*)/?(\d*)\s+(\
 _normal_regex = re.compile("^vn\s+(\S+)\s+(\S+)\s+(\S+)", re.MULTILINE)
 _texcoord_regex = re.compile("^vt\s+(\S+)\s+(\S+)", re.MULTILINE)
 _vertex_regex = re.compile("^v\s+(\S+)\s+(\S+)\s+(\S+)", re.MULTILINE)
+_vertex_regex_with_color = re.compile("^v\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)", re.MULTILINE)
 
 
 def _array_fromregex(f, regex, dtype):
@@ -29,7 +30,13 @@ def load_obj(filename, load_normals=False, load_texcoords=False, load_texture=Fa
         into a n x 3 index array 
         only loads obj files vertex positions and also
         only works with triangle or (when is_quadmesh=True) with quad meshes """
-    vertices = _array_fromregex(open(filename), _vertex_regex, np.float)
+    if load_colors:
+        data = _array_fromregex(open(filename), _vertex_regex_with_color, np.float)
+        vertices = data[:,:3]
+        colors = data[:,3:]
+    else:
+        vertices = _array_fromregex(open(filename), _vertex_regex, np.float)
+
     if load_normals:
         normals = _array_fromregex(open(filename), _normal_regex, np.float)
     if load_texcoords:
@@ -61,6 +68,9 @@ def load_obj(filename, load_normals=False, load_texcoords=False, load_texture=Fa
             raise IOError("Cannot read texture from %s" % filename)
         texture = imread(path.join(path.dirname(filename), tex_file))
         r.append(texture)
+
+    if load_colors:
+        r.append(colors)
     return r
 
 def save_obj(filename, vertices, faces, normals=None, texcoords=None, texture_file=None):
