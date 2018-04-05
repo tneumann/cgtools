@@ -24,7 +24,7 @@ def _array_fromregex(f, regex, dtype):
 
 
 def load_obj(filename, load_normals=False, load_texcoords=False, load_texture=False, 
-             load_full_face_definitions=False, is_quadmesh=False):
+             load_full_face_definitions=False, is_quadmesh=False, load_colors=False):
     """ load a wavefront obj file
         loads vertices into a (x,y,z) struct array and vertex indices
         into a n x 3 index array 
