@@ -2,6 +2,8 @@ import numpy as np
 import h5py
 
 def save_mesh_animation(filename, verts, tris, **kwargs):
+    verts = np.asarray(verts)
+    tris = np.asarray(tris)
     assert verts.ndim == 3
     assert tris.ndim == 2
     with h5py.File(filename, 'w') as f:
