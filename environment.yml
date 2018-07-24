@@ -1,0 +1,11 @@
+name: cgtools
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - h5py>=2.7.1
+  - mayavi>=4.5.0
+  - numpy>=1.13
+  - pybind11>=2.2.2
+  - pytest>=3.3.2
+  - scipy>=1.1.0

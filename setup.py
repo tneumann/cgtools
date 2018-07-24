@@ -105,7 +105,6 @@ setup(
     author_email = "neumann.thomas@gmail.com",
     description = "Tools computer graphics and vision, mostly for numpy / scipy",
     license = "MIT",
-    install_requires=['numpy'],
     cmdclass={'build_ext': BuildExt},
     ext_modules = ext_modules,
     packages = ['cgtools', 'cgtools.fastmath', 'cgtools.io', 'cgtools.vis', 'cgtools.mesh'],
