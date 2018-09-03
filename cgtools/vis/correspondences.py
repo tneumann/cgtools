@@ -37,24 +37,32 @@ def visualize_point_correspondences(source_pts, target_pts, ij_corr=None, scalar
 class Morpher(HasTraits):
     alpha = Range(0.0, 1.0)
 
-    def __init__(self, verts1, verts2, tris=None, as_points=False, scalars=None,
+    def __init__(self, verts1, verts2, tris=None, lines=None, as_points=False, scalars=None,
                  actor_property=dict(specular=0.1, specular_power=128., diffuse=0.5),
                  ):
         if tris is None:
-            as_points = True
+            if lines is None:
+                rep = 'points'
+            else:
+                rep = 'wireframe'
+        else:
+            rep = 'surface'
         HasTraits.__init__(self)
         self._verts1, self._verts2 = verts1, verts2
         self._polydata = tvtk.PolyData(points=verts1)
-        if as_points:
+        if rep == 'points':
             self._polydata.verts = np.r_[:len(verts1)].reshape(-1,1)
-        else:
+        if tris is not None:
             self._polydata.polys = tris
+        if lines is not None:
+            self._polydata.lines = lines
         n = tvtk.PolyDataNormals(splitting=False)
         configure_input_data(n, self._polydata)
         self._actor = tvtk.Actor(mapper=tvtk.PolyDataMapper())
         configure_input(self._actor.mapper, n)
-        if as_points:
-            self._actor.property.set(representation='points', point_size=5)
+        self._actor.property.representation = rep
+        if rep == 'points':
+            self._actor.property.point_size = 5
         if as_points and scalars is None:
             self._polydata.point_data.scalars = \
                     np.random.uniform(0, 255, (len(verts1), 3)).astype(np.uint8)
