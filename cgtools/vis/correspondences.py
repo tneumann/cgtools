@@ -37,7 +37,8 @@ def visualize_point_correspondences(source_pts, target_pts, ij_corr=None, scalar
 class Morpher(HasTraits):
     alpha = Range(0.0, 1.0)
 
-    def __init__(self, verts1, verts2, tris=None, lines=None, as_points=False, scalars=None,
+    def __init__(self, verts1, verts2, tris=None, lines=None, as_points=False, 
+                 scalars=None, scalars2=None, vmin=None, vmax=None,
                  actor_property=dict(specular=0.1, specular_power=128., diffuse=0.5),
                  ):
         if tris is None:
@@ -68,14 +69,34 @@ class Morpher(HasTraits):
                     np.random.uniform(0, 255, (len(verts1), 3)).astype(np.uint8)
         if scalars is not None:
             self._polydata.point_data.scalars = scalars
-            self._actor.mapper.scalar_range = (scalars.min(), scalars.max())
+            # automatically determine minimum/maximum from scalars if not given by user
+            if vmin is None:
+                vmin = scalars.min()
+                if scalars2 is not None:
+                    vmin = min(vmin, scalars2.min())
+            if vmax is None:
+                vmax = scalars.max()
+                if scalars2 is not None:
+                    vmax = max(vmax, scalars2.max())
+            self._actor.mapper.use_lookup_table_scalar_range = False
+            self._actor.mapper.scalar_range = (vmin, vmax)
             self._actor.mapper.lookup_table.hue_range = (0.33, 0)
+            # when scalars of second mesh given we need to store both scalars in order
+            # to interpolate between them during rendering
+            if scalars2 is not None:
+                self._scalars12 = (scalars, scalars2)
+            else:
+                self._scalars12 = None
         else:
             self._actor.property.set(**actor_property)
         mlab.gcf().scene.add_actor(self._actor)
 
     def _alpha_changed(self):
-        self._polydata.points = self._verts1 * (1 - self.alpha) + self._verts2 * self.alpha
+        self._polydata.points = self._verts1 * (1 - self.alpha) \
+                              + self._verts2 * self.alpha
+        if self._scalars12 is not None:
+            self._polydata.point_data.scalars = self._scalars12[0] * (1 - self.alpha) \
+                                              + self._scalars12[1] * self.alpha
         mlab.gcf().scene.render()
 
     traits_view = View(Item('alpha', show_label=False), title='cgtools Morpher')
