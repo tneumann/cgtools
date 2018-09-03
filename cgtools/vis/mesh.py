@@ -71,6 +71,13 @@ def viscroud(meshes, axis=0, padding=1.2, **kwargs):
     offset = np.zeros(3)
     offset[axis] = np.max([mesh[0][:,axis].ptp() for mesh in meshes]) * padding
     tms = []
+    # find common minimum when multiple scalars are given per mesh
+    # find common minimum when multiple scalars are given per mesh
+    scalars = [mesh[2] for mesh in meshes if len(mesh) > 2]
+    if len(scalars) > 0:
+        kwargs['vmin'] = np.min(scalars)
+        kwargs['vmax'] = np.max(scalars)
+
     for i, mesh in enumerate(meshes):
         verts, tris = mesh[:2]
         scalars = mesh[2] if len(mesh) > 2 else None
