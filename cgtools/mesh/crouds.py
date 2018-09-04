@@ -46,3 +46,15 @@ def distribute_points(list_of_points, axes=(0, 2), pad_factor=1.2, spacing=None,
         return ret
 
 
+class Croud():
+    def __init__(self, list_of_points, **kwargs_for_distribute):
+        kwargs_for_distribute['return_offsets'] = True
+        _, self.offsets = distribute_points(list_of_points, **kwargs_for_distribute)
+
+    def distribute(self, list_of_points, list_of_faces=None):
+        distributed_verts = [p + o for p, o in zip(list_of_points, self.offsets)]
+        if list_of_faces is None:
+            return np.vstack(distributed_verts)
+        else:
+            return merge_meshes(distributed_verts, list_of_faces)
+
