@@ -1,15 +1,25 @@
 import numpy as np
 from StringIO import StringIO
 
-def save_off(filename, vertices=None, faces=None):
+def save_off(filename, vertices=None, faces=None, scalars=None, vmin=None, vmax=None):
     if vertices is None:
         vertices = []
     if faces is None:
         faces = []
+    has_color = scalars is not None
     with open(filename, 'w') as f:
-        f.write("OFF\n%d %d 0\n" % (len(vertices), len(faces)))
+        f.write("%s\n%d %d 0\n" % (['OFF', 'COFF'][has_color], len(vertices), len(faces)))
         if len(vertices) > 1:
-            np.savetxt(f, vertices, fmt="%.12f %.12f %.12f")
+            if has_color:
+                import matplotlib as mpl
+                import matplotlib.cm as cm
+
+                norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
+                rgba = cm.ScalarMappable(norm=norm, cmap=cm.jet).to_rgba(scalars)
+
+                np.savetxt(f, np.hstack((vertices, rgba[:, :3])))
+            else:
+                np.savetxt(f, vertices, fmt="%.12f %.12f %.12f")
         if len(faces) > 1:
             for face in faces:
                 fmt = " ".join(["%d"] * (len(face) + 1)) + "\n"
