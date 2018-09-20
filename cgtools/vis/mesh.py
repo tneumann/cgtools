@@ -30,6 +30,10 @@ def vismesh(pts, tris, color=None, edge_visibility=False, shader=None, triangle_
     if 'scalars' in kwargs and np.asarray(kwargs['scalars']).ndim == 2:
         colors = kwargs['scalars']
         del kwargs['scalars']
+    # VTK does not allow bool arrays as scalars normally, so convert to float 
+    if 'scalars' in kwargs and np.asarray(kwargs['scalars']).dtype == np.bool:
+        kwargs['scalars'] = kwargs['scalars'].astype(np.float)
+
     tm = mlab.triangular_mesh(pts[:,0], pts[:,1], pts[:,2], tris, color=color, **kwargs)
     if shader is not None:
         tm.actor.property.load_material(shader)
