@@ -5,8 +5,12 @@ from tvtk.common import configure_input, configure_input_data
 
 
 
-def mesh_as_vtk_actor(verts, tris, compute_normals=True, return_polydata=True, scalars=None):
-    pd = tvtk.PolyData(points=verts, polys=tris)
+def mesh_as_vtk_actor(verts, tris=None, lines=None, compute_normals=True, return_polydata=True, scalars=None):
+    pd = tvtk.PolyData(points=verts)
+    if tris is not None:
+        pd.polys = tris
+    if lines is not None:
+        pd.lines = lines
     if scalars is not None:
         pd.point_data.scalars = scalars
     actor = polydata_actor(pd, compute_normals=compute_normals)
