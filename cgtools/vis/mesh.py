@@ -27,6 +27,7 @@ def polydata_actor(polydata, compute_normals=True):
         polydata = normals
     actor = tvtk.Actor(mapper=tvtk.PolyDataMapper())
     configure_input(actor.mapper, polydata)
+    actor.mapper.lookup_table.hue_range = (0.33, 0.)
     return actor
 
 
