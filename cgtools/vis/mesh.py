@@ -57,8 +57,9 @@ def vismesh(pts, tris, color=None, edge_visibility=False, shader=None, triangle_
         # this basically is a hack which doesn't quite work, 
         # we have to completely replace the polydata behind the hands of mayavi
         tm.mlab_source.dataset.point_data.scalars = colors.astype(np.uint8)
-        tm.actor.mapper.input = tvtk.PolyDataNormals(
-            input=tm.mlab_source.dataset, splitting=False).output
+        normals = tvtk.PolyDataNormals(splitting=False)
+        configure_input_data(normals, tm.mlab_source.dataset)
+        configure_input(tm.actor.mapper, normals)
     return tm
 
 def compute_normals(pts, faces):
