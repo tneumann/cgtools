@@ -13,7 +13,7 @@ def merge_meshes(list_of_verts, list_of_faces):
     return merged_verts, np.vstack((merged_tris))
 
 
-def distribute_points(list_of_points, axes=(0, 2), pad_factor=1.2, spacing=None, return_spacing=False, return_offsets=False):
+def distribute_points(list_of_points, axes=(0, 2), n1=None, pad_factor=1.2, spacing=None, return_spacing=False, return_offsets=False):
     if isinstance(axes, int):
         axes = [axes]
     if len(axes) > 2:
@@ -25,8 +25,13 @@ def distribute_points(list_of_points, axes=(0, 2), pad_factor=1.2, spacing=None,
     if len(axes) == 1:
         n1 = len(list_of_points)
     else:
-        n1 = int(np.floor(np.sqrt(len(list_of_points))))
-        n2 = int(np.ceil(np.sqrt(len(list_of_points))))
+        if n1 is None:
+            n1 = int(np.ceil(np.sqrt(len(list_of_points))))
+            n2 = int(np.ceil(np.sqrt(len(list_of_points))))
+        else:
+            n2 = int(np.ceil(len(list_of_points) / float(n1)))
+            assert n1 * n2 >= len(list_of_points)
+
         rng[axes[1]] = np.r_[ : n2 * spacing[axes[1]] : spacing[axes[1]]]
 
     rng[axes[0]] = np.r_[ : n1 * spacing[axes[0]] : spacing[axes[0]]]
