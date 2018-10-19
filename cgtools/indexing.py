@@ -60,17 +60,20 @@ def group_all_array(query):
     return {v: np.flatnonzero(inverse == i) for i, v in enumerate(values)}
     
 
-def filter_reindex(condition, target):
+def filter_reindex(condition, indices):
     """
-    Filtering of index arrays.
+    Filtering of index arrays. Filters and reindex a given index array ("indices"). 
+    Say you have target[indices] and now you filter target by some condition, e.g.
+    target[condition]. Then, target[condition][indices] will not work anymore.
+    Use filter_reindex to fix that: target[condition][filter_reindex(condition, indices)]
 
-    To explain this, let me give an example. Let's say you have the following data:
+    To explain this better, let us look at an example. Let's say you have the following data:
     >>> data = np.array(['a', 'b', 'c', 'd'])
     
     You also have another array that consists of indices into this array
-    >>> indices = np.array([0, 3, 3, 0])
+    >>> indices = np.array([0, 3, 2, 0])
     >>> print(data[indices])
-    ['a' 'd' 'd' 'a']
+    ['a' 'd' 'c' 'a']
 
     Now, say you are filtering some elements in your data array
     >>> condition = (data == 'a') | (data == 'd')
@@ -84,23 +87,91 @@ def filter_reindex(condition, target):
         ...
     IndexError: index 3 is out of bounds for axis 1 with size 2
 
-    Based on an old index array (target), this method returns a new index array 
+    Based on an old index array, this method returns a new index array 
     that re-indices into the data array as if condition was applied to this array, so
     >>> filtered_indices = filter_reindex(condition, indices)
     >>> print(filtered_indices)
-    [0 1 1 0]
+    [0 1 0]
     >>> print(filtered_data[filtered_indices])
-    ['a' 'd' 'd' 'a']
+    ['a' 'd' 'a']
 
     >>> indices = np.array([1, 4, 1, 4])
     >>> condition = np.array([False, True, False, False, True])
     >>> print(filter_reindex(condition, indices))
     [0 1 0 1]
+
+    Also works when one of the filtered elements actually is not in the indices
+    >>> data = np.array(['a', 'b', 'c'])
+    >>> indices = np.array([0, 0, 1, 1])
+    >>> condition = np.array([True, False, True])
+    >>> print(data[indices])
+    ['a' 'a' 'b' 'b']
+    >>> indices_filtered = filter_reindex(condition, indices)
+    >>> print(indices_filtered)
+    [0 0]
+
+    Filtering everything returns an empty index array
+    >>> indices = np.array([1, 1, 2, 3])
+    >>> condition = np.array([True, False, False, False])
+    >>> print(filter_reindex(condition, indices))
+    []
+
+    Also works for n-dim arrays, for example to filter a mesh. 
+    E.g. given a list of vertices in 2D.
+    >>> verts = np.array([(0, 0), (1, 0), (1, 1), (0, 1), (0, 2)])
+
+    And a list of triangles:
+    >>> triangles = np.array([(0, 1, 2), (0, 2, 3), (3, 2, 4)])
+
+    Lets say we want to filter some of the vertices:
+    >>> vert_mask = [True, True, True, False, True]
+    >>> verts_new = verts[vert_mask]
+
+    Now, if we filter the vertices and keep using the triangles, we will get an index error:
+    >>> verts_new[triangles]
+    Traceback (most recent call last):
+        ...
+    IndexError: ...
+
+    This can be fixed by filter_reindex:
+    >>> print(filter_reindex(vert_mask, triangles))
+    [[0 1 2]]
+
+    This works with n-d indices:
+    >>> target = np.random.random((100, 6))
+    >>> indices = np.random.randint(len(target), size=(3000, 2, 4, 3))
+    >>> target[indices].shape
+    (3000, 2, 4, 3, 6)
+    >>> mask = (target > 0.8).any(axis=1)
+    >>> target_masked = target[mask]
+    >>> target_masked[indices]
+    Traceback (most recent call last):
+        ...
+    IndexError: ...
+    >>> indices_masked = filter_reindex(mask, indices)
+    >>> target_masked[indices_masked].shape[1:]
+    (2, 4, 3, 6)
+
     """
+    condition = np.asarray(condition)
     if condition.dtype != np.bool:
-        raise ValueError, "condition must be a binary array"
+        raise ValueError("condition must be a binary array")
+    if condition.ndim > 1:
+        raise ValueError("condition must be a 1D array")
+
+    # build the reindexing array
     reindex = np.cumsum(condition) - 1
-    return reindex[target]
+
+    # filter indices
+    if indices.ndim == 1:
+        ind_mask = condition[indices]
+
+    else:
+        ind_2d = indices.reshape(indices.shape[0], -1)
+        # accept only indices that have no items filtered
+        ind_mask = condition[ind_2d].all(axis=-1)
+
+    return reindex[indices][ind_mask]
 
 
 def valid_indices(indices, array_shape, return_mask=False):
