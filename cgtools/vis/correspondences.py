@@ -67,6 +67,8 @@ class Morpher(HasTraits):
         if as_points and scalars is None:
             self._polydata.point_data.scalars = \
                     np.random.uniform(0, 255, (len(verts1), 3)).astype(np.uint8)
+
+        self._scalars12 = None
         if scalars is not None:
             self._polydata.point_data.scalars = scalars
             # automatically determine minimum/maximum from scalars if not given by user
@@ -78,15 +80,14 @@ class Morpher(HasTraits):
                 vmax = scalars.max()
                 if scalars2 is not None:
                     vmax = max(vmax, scalars2.max())
-            self._actor.mapper.use_lookup_table_scalar_range = False
-            self._actor.mapper.scalar_range = (vmin, vmax)
-            self._actor.mapper.lookup_table.hue_range = (0.33, 0)
+            if scalars.ndim == 1:
+                self._actor.mapper.use_lookup_table_scalar_range = False
+                self._actor.mapper.scalar_range = (vmin, vmax)
+                self._actor.mapper.lookup_table.hue_range = (0.33, 0)
             # when scalars of second mesh given we need to store both scalars in order
             # to interpolate between them during rendering
             if scalars2 is not None:
                 self._scalars12 = (scalars, scalars2)
-            else:
-                self._scalars12 = None
         else:
             self._actor.property.set(**actor_property)
         mlab.gcf().scene.add_actor(self._actor)
@@ -95,8 +96,13 @@ class Morpher(HasTraits):
         self._polydata.points = self._verts1 * (1 - self.alpha) \
                               + self._verts2 * self.alpha
         if self._scalars12 is not None:
-            self._polydata.point_data.scalars = self._scalars12[0] * (1 - self.alpha) \
-                                              + self._scalars12[1] * self.alpha
+            blended = self._scalars12[0] * (1 - self.alpha) \
+                    + self._scalars12[1] * self.alpha
+            # when scalars is a (n_verts, 3) color array (type uint8)
+            # then above blending will cast to float, undo this here:
+            if self._scalars12[0].dtype == np.uint8:
+                blended = blended.astype(np.uint8)
+            self._polydata.point_data.scalars = blended
         mlab.gcf().scene.render()
 
     traits_view = View(Item('alpha', show_label=False), title='cgtools Morpher')
