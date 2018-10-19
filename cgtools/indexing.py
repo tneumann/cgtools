@@ -255,7 +255,7 @@ def sparse_indicator_matrix(ci, num_cols, omega=1.):
     >>> x = np.array([4, 5, 6, 7, 8], np.float)
     >>> C = sparse_indicator_matrix([1, 2, 4], 5)
     >>> print(C * x)
-    [ 5. 6. 8.]
+    [5. 6. 8.]
     """
     ci = np.asanyarray(ci)
     if ci.dtype == np.bool:
