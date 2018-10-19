@@ -52,6 +52,17 @@ def distribute_points(list_of_points, axes=(0, 2), n1=None, pad_factor=1.2, spac
         return ret
 
 
+def distribute_meshes(list_of_points, list_of_faces, **kwargs):
+    ret1 = distribute_points(list_of_points, **kwargs)
+    ret2 = merge_meshes(ret1[0], list_of_faces)
+    ret2 = list(ret2) + ret1[1:]
+    return ret2
+
+
+def duplicate_and_distribute_mesh(verts, faces, n, **kwargs):
+    return distribute_meshes([verts] * n, faces, **kwargs)
+
+
 class Croud():
     def __init__(self, list_of_points, **kwargs_for_distribute):
         kwargs_for_distribute['return_offsets'] = True
