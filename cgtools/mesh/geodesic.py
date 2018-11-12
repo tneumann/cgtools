@@ -82,7 +82,7 @@ class GeodesicDistanceComputation(object):
         grad_u =  self._unit_normal_cross_e01 * (n_u * u[self._tris[:,2]])[:,np.newaxis] \
                 + self._unit_normal_cross_e12 * (n_u * u[self._tris[:,0]])[:,np.newaxis] \
                 + self._unit_normal_cross_e20 * (n_u * u[self._tris[:,1]])[:,np.newaxis]
-        with np.errstate(divide='ignore'):
+        with np.errstate(all='ignore'):
             X = - grad_u / veclen(grad_u)[:,np.newaxis]
             X = np.nan_to_num(X, copy=False)
 
