@@ -63,6 +63,7 @@ class GeodesicDistanceComputation(object):
         u = self._factored_AtLc(u0).ravel()
         # running heat flow with multiple sources results in heat flowing
         # into the source region. So just set the source region to the constrained value.
+        u[idx] = 1
         # I tried solving the equality-constrained quadratic program that would fix this
         # during the solve, but that did not seem to yield a lower error 
         # (but it meant that prefactorization is not straightforward)
@@ -73,7 +74,6 @@ class GeodesicDistanceComputation(object):
         #    Q = sparse.bmat([(self.A - self.t * self.Lc, I.T),
         #                    (I, None)])
         #    u = sparse.linalg.spsolve(Q, np.concatenate((u0, np.ones(I.shape[0]))))[:self._verts.shape[0]]
-        u[idx] = 1
 
         # -- heat method step 2
         # magnitude that we use to normalize the heat values across triangles
