@@ -61,6 +61,20 @@ class GeodesicDistanceComputation(object):
         u0[idx] = 1.0
         # -- heat method, step 1
         u = self._factored_AtLc(u0).ravel()
+        # running heat flow with multiple sources results in heat flowing
+        # into the source region. So just set the source region to the constrained value.
+        # I tried solving the equality-constrained quadratic program that would fix this
+        # during the solve, but that did not seem to yield a lower error 
+        # (but it meant that prefactorization is not straightforward)
+        # The QP solution would look something like:
+        #    from scipy import sparse
+        #    from cgtools.indexing import sparse_indicator_matrix
+        #    I = sparse_indicator_matrix(idx, self._verts.shape[0])
+        #    Q = sparse.bmat([(self.A - self.t * self.Lc, I.T),
+        #                    (I, None)])
+        #    u = sparse.linalg.spsolve(Q, np.concatenate((u0, np.ones(I.shape[0]))))[:self._verts.shape[0]]
+        u[idx] = 1
+
         # -- heat method step 2
         # magnitude that we use to normalize the heat values across triangles
         n_u = 1. / (u[self._tris].sum(axis=1))
@@ -68,7 +82,10 @@ class GeodesicDistanceComputation(object):
         grad_u =  self._unit_normal_cross_e01 * (n_u * u[self._tris[:,2]])[:,np.newaxis] \
                 + self._unit_normal_cross_e12 * (n_u * u[self._tris[:,0]])[:,np.newaxis] \
                 + self._unit_normal_cross_e20 * (n_u * u[self._tris[:,1]])[:,np.newaxis]
-        X = - grad_u / veclen(grad_u)[:,np.newaxis]
+        with np.errstate(divide='ignore'):
+            X = - grad_u / veclen(grad_u)[:,np.newaxis]
+            X = np.nan_to_num(X, copy=False)
+
         # -- heat method step 3
         # TODO this recomputes the cotangent weights, which is not at all necessary
         div_Xs = np.zeros(len(self._verts))
