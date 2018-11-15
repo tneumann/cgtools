@@ -21,7 +21,7 @@ def pointcloud_as_vtk_actor(points, pt_colors=None, point_size=5.0, alpha=1.0):
     configure_input(mapper,pd)
     actor = tvtk.Actor(mapper=mapper)
     actor.property.set(point_size=point_size, opacity=alpha)
-    return pd, actor
+    return actor, pd
 
 def vispoints(pts, point_colors=None, point_size=5., mode='2dvertex', **kwargs):
     v = mlab.points3d(
