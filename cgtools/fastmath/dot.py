@@ -101,8 +101,6 @@ if __name__ == '__main__':
     print
     print "measuring performance of multiplying %d %dx%d matrices with %d %d-dimensional vectors" % tuple(list(a.shape) + list(b.shape))
 
-    timeit_args = dict(repeat=5, number=10)
-
     speed_matmat = np.mean(timeit.repeat(t_matvec, **timeit_args))
     print "cgtools matmat:", speed_matmat
 
