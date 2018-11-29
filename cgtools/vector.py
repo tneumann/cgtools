@@ -1,10 +1,12 @@
 import numpy as np
+from fastmath import inv3, matvec
+
 
 __all__ = [
     'normalized', 'veclen', 'sq_veclen', 'scaled', 'dot', 'project',
     'homogenize', 'dehomogenize', 'hom', 'dehom', 'ensure_dim', 'hom3', 'hom4',
     'transform',
-    'convert_3x4_to_4x4', 'to_4x4', 'assemble_4x4',
+    'convert_3x4_to_4x4', 'to_4x4', 'assemble_4x4', 'assemble_3x4', 'inv_3x4',
 ]
 
 ARR = np.asanyarray
@@ -149,6 +151,45 @@ def convert_3x4_to_4x4(matrices, new_row=[0, 0, 0, 1]):
 
 to_4x4 = convert_3x4_to_4x4
 
+
+def assemble_3x4(rotations, translations):
+    """
+    Given one (or more) 3x3 matrices and one (or more) 3d vectors,
+    create an array of 3x4 matrices
+
+    >>> rots = np.arange(9).reshape(3, 3)
+    >>> ts = np.array([99, 88, 77])
+    >>> assemble_3x4(rots, ts)
+    array([[ 0,  1,  2, 99],
+           [ 3,  4,  5, 88],
+           [ 6,  7,  8, 77]])
+
+    >>> rots = np.random.random((100, 3, 3))
+    >>> ts = np.random.random((100, 3))
+    >>> Ms = assemble_3x4(rots, ts)
+    >>> Ms.shape
+    (100, 3, 4)
+    >>> np.all(Ms[:, :, :3] == rots)
+    True
+    >>> np.all(Ms[:, :, 3] == ts)
+    True
+    """
+    if rotations.ndim not in [2, 3] or rotations.shape[-2:] != (3, 3):
+        raise ValueError("requires rotations argument to be one or more 3x3 matrices, so the shape should be either (3, 3) or (n, 3, 3)")
+    if translations.ndim not in [1, 2] or translations.shape[-1] != 3:
+        raise ValueError("requires translations argument to be one or more 3d vectors, so the shape should be either (3,) or (n, 3)")
+    if rotations.ndim == 2 and translations.ndim == 1:
+        # single translation, single rotation -> output single matrix
+        return np.column_stack((rotations, translations))
+    else:
+        if rotations.ndim == 2:
+            rotations = rotations[np.newaxis]
+        if translations.ndim == 1:
+            translations = translations[np.newaxis]
+        translations = translations[:, :, np.newaxis]
+        return np.concatenate((rotations, translations), axis=-1)
+
+
 def assemble_4x4(rotations, translations, new_row=[0, 0, 0, 1]):
     """
     Given one (or more) 3x3 matrices and one (or more) 3d vectors,
@@ -174,18 +215,23 @@ def assemble_4x4(rotations, translations, new_row=[0, 0, 0, 1]):
     >>> np.all(Ms[:, 3, :] == np.array([0, 0, 0, 1]))
     True
     """
-    if rotations.ndim not in [2, 3] or rotations.shape[-2:] != (3, 3):
-        raise ValueError("requires rotations argument to be one or more 3x3 matrices, so the shape should be either (3, 3) or (n, 3, 3)")
-    if translations.ndim not in [1, 2] or translations.shape[-1] != 3:
-        raise ValueError("requires translations argument to be one or more 3d vectors, so the shape should be either (3,) or (n, 3)")
-    if rotations.ndim == 2 and translations.ndim == 1:
-        # single translation, single rotation -> output single matrix
-        return to_4x4(np.column_stack((rotations, translations)), new_row=new_row)
-    else:
-        if rotations.ndim == 2:
-            rotations = rotations[np.newaxis]
-        if translations.ndim == 1:
-            translations = translations[np.newaxis]
-        translations = translations[:, :, np.newaxis]
-        return to_4x4(np.concatenate((rotations, translations), axis=-1), new_row=new_row)
+    return to_4x4(assemble_3x4(rotations, translations), new_row=new_row)
+
+
+def inv_3x4(matrices):
+    """Given one (or more) 3x4 matrices, converts matrices into common
+    transformation matrices by appending a row (0, 0, 0, 1), then
+    inverts those matrices. Since the inverse will also have the
+    same last row, the returned matrices are also 3x4
+
+    >>> X = np.random.random((3, 4))
+    >>> X_4x4 = to_4x4(X)
+    >>> np.allclose(inv_3x4(X), np.linalg.inv(X_4x4)[:3, :])
+    True
+    """
+    if matrices.ndim not in [2, 3] or matrices.shape[-2:] != (3, 4):
+        raise ValueError("requires matrices argument to be one or more 3x4 matrices, so the shape should be either (3, 4) or (n, 3, 4)")
+    R_inv = inv3(matrices[..., :3, :3]) # "rotation" part (upper left 3x3 block)
+    t_inv = matvec(R_inv, -matrices[..., :3, 3]) # "translation" part
+    return assemble_3x4(R_inv, t_inv)
 
