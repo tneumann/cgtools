@@ -114,14 +114,11 @@ def transform(v, M, w=1):
     this will be done by homogenizing the vectors
     (with the last dimension filled with w) and
     then applying the transformation
-
-    TODO: unit tests
     """
-    if M.shape[0] == M.shape[1] == v.shape[-1] + 1:
-        v1 = hom(v, value=w)
-        return dehom(np.dot(v1.reshape((-1,v1.shape[-1])), M.T)).reshape(v.shape)
+    if M.shape[-1] == v.shape[-1] + 1:
+        return dehom(matvec(M, hom(v)))
     else:
-        return np.dot(v.reshape((-1,v.shape[-1])), M.T).reshape(v.shape)
+        return matvec(M, v)
 
 def toskewsym(v):
     assert v.shape == (3,)
