@@ -64,31 +64,51 @@ if __name__ == '__main__':
     import timeit
     a = np.random.random((10000, 4, 4))
     b = np.random.random((10000, 4, 4))
+
     def t_matmat():
         matmat(a, b)
-    def t_matmat_np():
+    def t_naive_np():
         np.array(map(np.dot, a, b))
-    print "matmat"
-    print "c++:", 
-    speed1 = np.mean(timeit.repeat(t_matmat, repeat=5, number=100))
-    print speed1
-    print "numpy:", 
-    speed2 = np.mean(timeit.repeat(t_matmat_np, repeat=5, number=100))
-    print speed2
-    print "speedup %.2f" % np.mean(speed2 / speed1)
+    def t_matmul():
+        np.matmul(a, b)
+
+    print "measuring performance of multiplying %d %dx%d matrices" % a.shape
+
+    timeit_args = dict(repeat=5, number=100)
+
+    speed_matmat = np.mean(timeit.repeat(t_matmat, **timeit_args))
+    print "cgtools matmat:", speed_matmat
+
+    speed_matmul = np.mean(timeit.repeat(t_matmul, **timeit_args))
+    print "numpy matmul: %f (speedup %.2f)" % (speed_matmul, speed_matmul / speed_matmat)
+
+    speed_np = np.mean(timeit.repeat(t_naive_np, **timeit_args))
+    print "naive numpy: %f (speedup %.2f)" % (speed_np, speed_np / speed_matmat)
+
 
     a = np.random.random((10000, 4, 4))
     b = np.random.random((10000, 4))
+
     def t_matvec():
-        matvec(a, b)
-    def t_matvec_np():
+        return matvec(a, b)
+    def t_matvec_naive_np():
         np.array(map(np.dot, a, b))
-    print "matvec"
-    print "c++:", 
-    speed1 = np.mean(timeit.repeat(t_matvec, repeat=5, number=100))
-    print speed1
-    print "numpy:", 
-    speed2 = np.mean(timeit.repeat(t_matvec_np, repeat=5, number=100))
-    print speed2
-    print "speedup %.2f" % np.mean(speed2 / speed1)
+    def t_matvec_matmul():
+        return np.matmul(a, b[:, :, np.newaxis])[:, :, 0]
+
+    print(np.allclose(t_matvec(), t_matvec_matmul()))
+
+    print
+    print "measuring performance of multiplying %d %dx%d matrices with %d %d-dimensional vectors" % tuple(list(a.shape) + list(b.shape))
+
+    timeit_args = dict(repeat=5, number=10)
+
+    speed_matmat = np.mean(timeit.repeat(t_matvec, **timeit_args))
+    print "cgtools matmat:", speed_matmat
+
+    speed_matmul = np.mean(timeit.repeat(t_matvec_matmul, **timeit_args))
+    print "numpy matmul: %f (speedup %.2f)" % (speed_matmul, speed_matmul / speed_matmat)
+
+    speed_np = np.mean(timeit.repeat(t_matvec_naive_np, **timeit_args))
+    print "naive numpy: %f (speedup %.2f)" % (speed_np, speed_np / speed_matmat)
 
