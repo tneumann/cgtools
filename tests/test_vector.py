@@ -16,86 +16,110 @@ def test_transform_many_matrices_many_vectors():
         # no translation:
         vectors = np.random.random((1000, dim))
         xforms = np.random.random(((1000, dim, dim)))
-        ref = np.array([
+        reference = np.array([
             M.dot(v)
             for v, M in zip(vectors, xforms)
         ])
-        npt.assert_allclose(ref, V.transform(vectors, xforms))
+        result = V.transform(vectors, xforms)
+        assert result.shape == vectors.shape
+        npt.assert_allclose(reference, result)
 
         # with translation, no perspective (e.g. the common 3x4 matrices)
         vectors = np.random.random((1000, dim))
         xforms = np.random.random(((1000, dim, dim + 1)))
-        ref = np.array([
-            V.dehom(M.dot(V.hom(v)))
+        reference = np.array([
+            M.dot(V.hom(v))
             for v, M in zip(vectors, xforms)
         ])
-        npt.assert_allclose(ref, V.transform(vectors, xforms))
+        result = V.transform(vectors, xforms)
+        assert result.shape == vectors.shape
+        npt.assert_allclose(reference, result)
 
         # with translation, no perspective
         vectors = np.random.random((1000, dim))
         xforms = np.random.random(((1000, dim + 1, dim + 1)))
-        ref = np.array([
+        reference = np.array([
             V.dehom(M.dot(V.hom(v)))
             for v, M in zip(vectors, xforms)
         ])
-        npt.assert_allclose(ref, V.transform(vectors, xforms))
+        result = V.transform(vectors, xforms)
+        assert result.shape == vectors.shape
+        npt.assert_allclose(reference, result)
 
 def test_transform_one_matrix_many_vectors():
     for dim in [2, 3, 4]:
         # no translation:
         vectors = np.random.random((1000, dim))
         M = np.random.random(((dim, dim)))
-        ref = np.array([M.dot(v) for v in vectors])
-        npt.assert_allclose(ref, V.transform(vectors, M))
+        reference = np.array([M.dot(v) for v in vectors])
+        result = V.transform(vectors, M)
+        assert result.shape == vectors.shape
+        npt.assert_allclose(reference, result)
 
         # with translation, no perspective (e.g. the common 3x4 matrices)
         vectors = np.random.random((1000, dim))
         M = np.random.random(((dim, dim + 1)))
-        ref = np.array([V.dehom(M.dot(V.hom(v))) for v in vectors])
-        npt.assert_allclose(ref, V.transform(vectors, M))
+        reference = np.array([M.dot(V.hom(v)) for v in vectors])
+        result = V.transform(vectors, M)
+        assert result.shape == vectors.shape
+        npt.assert_allclose(reference, result)
 
         # with translation, no perspective
         vectors = np.random.random((1000, dim))
         M = np.random.random(((dim + 1, dim + 1)))
-        ref = np.array([V.dehom(M.dot(V.hom(v))) for v in vectors])
-        npt.assert_allclose(ref, V.transform(vectors, M))
+        reference = np.array([V.dehom(M.dot(V.hom(v))) for v in vectors])
+        result = V.transform(vectors, M)
+        assert result.shape == vectors.shape
+        npt.assert_allclose(reference, result)
 
 def test_transform_many_matrices_one_vector():
     for dim in [2, 3, 4]:
         # no translation:
         v = np.random.random((dim))
         xforms = np.random.random(((1000, dim, dim)))
-        ref = np.array([ M.dot(v) for M in xforms ])
-        npt.assert_allclose(ref, V.transform(v, xforms))
+        reference = np.array([ M.dot(v) for M in xforms ])
+        result = V.transform(v, xforms)
+        assert result.shape == (1000, dim)
+        npt.assert_allclose(reference, result)
 
         # with translation, no perspective (e.g. the common 3x4 matrices)
         v = np.random.random((dim))
         xforms = np.random.random(((1000, dim, dim + 1)))
-        ref = np.array([ V.dehom(M.dot(V.hom(v))) for M in xforms ])
-        npt.assert_allclose(ref, V.transform(v, xforms))
+        reference = np.array([M.dot(V.hom(v)) for M in xforms ])
+        result = V.transform(v, xforms)
+        assert result.shape == (1000, dim)
+        npt.assert_allclose(reference, result)
 
         # with translation, no perspective
         v = np.random.random((dim))
         xforms = np.random.random(((1000, dim + 1, dim + 1)))
-        ref = np.array([ V.dehom(M.dot(V.hom(v))) for M in xforms ])
-        npt.assert_allclose(ref, V.transform(v, xforms))
+        reference = np.array([ V.dehom(M.dot(V.hom(v))) for M in xforms ])
+        result = V.transform(v, xforms)
+        assert result.shape == (1000, dim)
+        npt.assert_allclose(reference, result)
 
 def test_transform_one_matrices_one_vector():
     for dim in [2, 3, 4]:
         # no translation:
         v = np.random.random((dim))
         M = np.random.random(((dim, dim)))
-        ref = M.dot(v)
-        npt.assert_allclose(ref, V.transform(v, M))
+        reference = M.dot(v)
+        result = V.transform(v, M)
+        assert result.shape == v.shape
+        npt.assert_allclose(reference, result)
 
         # with translation, no perspective (e.g. the common 3x4 matrices)
         v = np.random.random((dim))
         M = np.random.random(((dim, dim + 1)))
-        ref = V.dehom(M.dot(V.hom(v)))
-        npt.assert_allclose(ref, V.transform(v, M))
+        reference = M.dot(V.hom(v))
+        result = V.transform(v, M)
+        assert result.shape == v.shape
+        npt.assert_allclose(reference, result)
 
         # with translation, no perspective
         v = np.random.random((dim))
         M = np.random.random(((dim + 1, dim + 1)))
-        ref = V.dehom(M.dot(V.hom(v)))
-        npt.assert_allclose(ref, V.transform(v, M))
+        reference = V.dehom(M.dot(V.hom(v)))
+        result = V.transform(v, M)
+        assert result.shape == v.shape
+        npt.assert_allclose(reference, result)

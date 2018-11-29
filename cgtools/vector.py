@@ -116,7 +116,10 @@ def transform(v, M, w=1):
     then applying the transformation
     """
     if M.shape[-1] == v.shape[-1] + 1:
-        return dehom(matvec(M, hom(v)))
+        v1 = matvec(M, hom(v))
+        if v1.shape[-1] == v.shape[-1] + 1:
+            v1 = dehom(v1)
+        return v1
     else:
         return matvec(M, v)
 
