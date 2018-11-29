@@ -22,8 +22,8 @@ class GeodesicDistanceComputation(object):
         ACM Transactions on Graphics (SIGGRAPH 2013)
 
     Example usage:
-        >>> compute_distance = GeodesicDistanceComputation(vertices, triangles)
-        >>> distance_of_each_vertex_to_vertex_0 = compute_distance(0)
+        $ compute_distance = GeodesicDistanceComputation(vertices, triangles)
+        $ distance_of_each_vertex_to_vertex_0 = compute_distance(0)
 
     """
 
