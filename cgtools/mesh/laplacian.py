@@ -69,6 +69,7 @@ def compute_mesh_laplacian(verts, tris, weight_type='cotangent',
     RP = verts[iR] - verts[iP] # R--P
     if weight_type == 'cotangent' or (return_vertex_area and area_type == 'mixed'):
         # compute cotangent at all 3 points in triangle PQR
+        # TODO all divisors can be replaced by double triangle area
         cotP = -1 * (PQ * RP).sum(axis=1) / V.veclen(np.cross(PQ, RP)) # angle at vertex P
         cotQ = -1 * (QR * PQ).sum(axis=1) / V.veclen(np.cross(QR, PQ)) # angle at vertex Q
         cotR = -1 * (RP * QR).sum(axis=1) / V.veclen(np.cross(RP, QR)) # angle at vertex R
