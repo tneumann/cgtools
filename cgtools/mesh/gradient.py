@@ -109,12 +109,7 @@ if __name__ == "__main__":
     f = eigvecs[:, -1]
 
     # compute gradient of heat flow and visualize
-    if 0:
-        grad_f = gradient(verts, tris, f)
-    else:
-        G = gradient_op2(verts, tris)
-        grad_f = (G * f).reshape(-1, 3)
-
+    grad_f = gradient(verts, tris, f)
 
     vismesh(verts, tris, scalars=f)
 
