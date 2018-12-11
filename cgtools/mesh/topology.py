@@ -11,6 +11,8 @@ def get_mesh_edges(verts, tris):
     v = verts[tris[:,2]] - verts[tris[:,0]]
     return u, v
 
+edges = get_mesh_edges
+
 
 def get_vertex_rings(tris):
     # TODO: can we achieve this quicker with scipy.sparse?
@@ -36,16 +38,33 @@ def get_edges_from_triangles(tris):
     return np.array(list(set(map(tuple, all_edges))))
 
 
-def get_per_triangle_normals(tris, verts, edges_uv=None):
+def get_per_triangle_normals(verts, tris, edges_uv=None):
     if edges_uv is None:
-        u, v = get_mesh_edges(tris, verts)
+        u, v = get_mesh_edges(verts, tris)
     else:
         u, v = edges_uv
     return V.normalized(np.cross(u, v))
 
 
-def get_triangle_frames(triangles, verts, normals=None):
-    u, v = get_mesh_edges(triangles, verts)
+def get_triangle_frames(verts, tris, normals=None):
+    u, v = get_mesh_edges(verts, tris)
     # need the normal of each triangle
-    normals = normals if normals is not None else get_per_triangle_normals(triangles, verts, edges_uv=(u, v))
+    normals = normals if normals is not None else get_per_triangle_normals(verts, tris, edges_uv=(u, v))
     return np.dstack((u, v, normals)) # swapaxes???
+
+
+def get_vertex_areas(verts, tris):
+    PQ = verts[tris[:, 0]] - verts[tris[:, 1]]
+    RP = verts[tris[:, 2]] - verts[tris[:, 0]]
+    lump_area = V.veclen(np.cross(PQ, RP)) / 6.
+    area = sum(np.bincount(tris[:,i], lump_area, minlength=len(verts)) for i in xrange(3))
+    return area
+
+
+def triangle_normal(verts, tris):
+    u, v = edges(verts, tris)
+    return np.cross(u, v)
+
+
+def double_triangle_area(verts, tris):
+    return V.veclen(triangle_normal(verts, tris))
