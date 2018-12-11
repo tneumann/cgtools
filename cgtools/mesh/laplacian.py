@@ -69,10 +69,10 @@ def compute_mesh_laplacian(verts, tris, weight_type='cotangent',
     RP = verts[iR] - verts[iP] # R--P
     if weight_type == 'cotangent' or (return_vertex_area and area_type == 'mixed'):
         # compute cotangent at all 3 points in triangle PQR
-        # TODO all divisors can be replaced by double triangle area
-        cotP = -1 * (PQ * RP).sum(axis=1) / V.veclen(np.cross(PQ, RP)) # angle at vertex P
-        cotQ = -1 * (QR * PQ).sum(axis=1) / V.veclen(np.cross(QR, PQ)) # angle at vertex Q
-        cotR = -1 * (RP * QR).sum(axis=1) / V.veclen(np.cross(RP, QR)) # angle at vertex R
+        double_area = V.veclen(np.cross(PQ, RP))
+        cotP = -1 * (PQ * RP).sum(axis=1) / double_area # angle at vertex P
+        cotQ = -1 * (QR * PQ).sum(axis=1) / double_area # angle at vertex Q
+        cotR = -1 * (RP * QR).sum(axis=1) / double_area # angle at vertex R
 
     # compute weights and indices
     if weight_type == 'cotangent':
@@ -124,6 +124,7 @@ def compute_mesh_laplacian(verts, tris, weight_type='cotangent',
             aQ = 1/8. * (cotR * (PQ**2).sum(axis=1) + cotP * (QR**2).sum(axis=1)) # area at point Q
             aR = 1/8. * (cotQ * (RP**2).sum(axis=1) + cotP * (QR**2).sum(axis=1)) # area at point R
             # replace by barycentric areas for obtuse triangles
+            # TODO area computed previously in cotangent formula, reuse it here?
             triangle_area = .5 * V.veclen(np.cross(PQ, RP))
             for i, c in enumerate([cotP, cotQ, cotR]):
                 is_x_obtuse = c < 0 # obtuse at point?
