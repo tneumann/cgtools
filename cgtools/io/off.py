@@ -31,11 +31,12 @@ def load_off(filename, no_colors=False):
     assert lines[0].strip() in ['OFF', 'COFF'], 'OFF header missing'
     has_colors = lines[0].strip() == 'COFF'
     n_verts, n_faces, _ = map(int, lines[1].split())
-    vertex_data = np.loadtxt(
-        StringIO(''.join(lines[2:2 + n_verts])), 
-        dtype=np.float)
+    vertex_data = np.fromstring(
+        ''.join(lines[2:2 + n_verts]), 
+        sep=' ', dtype=np.float).reshape(n_verts, -1)
     if n_faces > 0:
-        faces = np.loadtxt(StringIO(''.join(lines[2+n_verts:])), dtype=np.int)[:,1:]
+        faces = np.fromstring(''.join(lines[2+n_verts:]), 
+                              sep=' ', dtype=np.int).reshape(n_faces, -1)[:, 1:]
     else:
         faces = None
     if has_colors:
