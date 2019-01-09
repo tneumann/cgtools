@@ -6,7 +6,7 @@ from tvtk.common import configure_input_data, configure_input
 from traitsui.api import View, Item
 
 
-def visualize_point_correspondences(source_pts, target_pts, ij_corr=None, scalars=None):
+def visualize_point_correspondences(source_pts, target_pts, ij_corr=None, scalars=None, point_size=10):
     if ij_corr is None:
         if source_pts.shape != target_pts.shape:
             raise ValueError("must have same amount of source and target points, or specify ij_corr parameter")
@@ -18,7 +18,7 @@ def visualize_point_correspondences(source_pts, target_pts, ij_corr=None, scalar
     pd = tvtk.PolyData(points=p, verts=np.r_[:len(p)].reshape((-1,1)))
     actor = tvtk.Actor(mapper=tvtk.PolyDataMapper())
     configure_input_data(actor.mapper, pd)
-    actor.property.point_size=10
+    actor.property.point_size = point_size
     if scalars is not None:
         pd.point_data.scalars = scalars
         actor.mapper.scalar_range = scalars.min(), scalars.max()
