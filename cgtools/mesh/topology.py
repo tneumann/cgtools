@@ -24,6 +24,20 @@ def get_vertex_rings(tris):
     return ring_by_vertex_id
 
 
+def triangle_triangle_adjacency_list(tris):
+    """
+    determines triangle-triangle adjacency just from a list of triangles which are given as i,j,k index tuples
+    returns an array of shape (len(edges), 2), each tuple is a pair of indices of neighboring triangles
+    (in no particular order)
+    """
+    tri_by_edge = defaultdict(lambda: [])
+    for tri_index, (i, j, k) in enumerate(tris):
+        tri_by_edge[(min(i, j), max(i, j))].append(tri_index)
+        tri_by_edge[(min(j, k), max(j, k))].append(tri_index)
+        tri_by_edge[(min(k, i), max(k, i))].append(tri_index)
+    return np.array([ts for ts in tri_by_edge.values() if len(ts) == 2])
+
+
 def get_edges_from_triangles(tris):
     """
     >>> tris = [[0, 1, 2], [2, 1, 3], [3, 1, 4]]
@@ -68,3 +82,7 @@ def triangle_normal(verts, tris):
 
 def double_triangle_area(verts, tris):
     return V.veclen(triangle_normal(verts, tris))
+
+
+def triangle_area(verts, tris):
+    return double_triangle_area(verts, tris) / 2.
