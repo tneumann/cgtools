@@ -49,7 +49,7 @@ def vismesh(pts, tris, color=None, edge_visibility=False, shader=None, triangle_
         specular=0.0, specular_power=128., 
         diffuse=diffuse)
     if triangle_scalars is not None:
-        tm.mlab_source.dataset.cell_data.scalars = triangle_scalars
+        tm.actor.mapper.input.cell_data.scalars = triangle_scalars
         tm.actor.mapper.set(scalar_mode='use_cell_data', use_lookup_table_scalar_range=False,
                             scalar_visibility=True)
         if "vmin" in kwargs and "vmax" in kwargs:
