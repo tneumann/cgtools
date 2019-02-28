@@ -2,8 +2,11 @@ from __future__ import absolute_import
 
 from collections import defaultdict
 import numpy as np
+from scipy import sparse
+from scipy.sparse.csgraph import connected_components
 
 from .. import vector as V
+from ..indexing import filter_reindex
 
 
 def get_mesh_edges(verts, tris):
@@ -50,6 +53,39 @@ def get_edges_from_triangles(tris):
         np.minimum(all_edges[:,0], all_edges[:,1]),
         np.maximum(all_edges[:,0], all_edges[:,1]) ))
     return np.array(list(set(map(tuple, all_edges))))
+
+
+def edge_adjacency_matrix(tris, n_verts=None):
+    """
+    Returns a scipy.sparse.csr_matrix of size n_verts x n_verts
+    where element (i, j) is one if vertex i is connected to vertex j.
+
+    If n_verts is None, it is determined automatically from the triangle array.
+    """
+    if n_verts is None:
+        n_verts = tris.max() + 1
+    ij = np.r_[np.c_[tris[:, 0], tris[:, 1]],
+               np.c_[tris[:, 0], tris[:, 2]],
+               np.c_[tris[:, 1], tris[:, 2]]]
+    return sparse.csr_matrix(
+        (np.ones(len(ij)), ij.T),
+        shape=(n_verts, n_verts))
+
+
+def largest_connected_component(tris):
+    """
+    Returns vertex indices of the largest connected component of the mesh
+    as well as a reindexed triangle array, e.g. use it like so:
+
+    ix, tris_new = largest_connected_component(tris)
+    show_mesh(verts[ix], tris_new)
+    """
+    _, labels = connected_components(edge_adjacency_matrix(tris), directed=False)
+    largest = np.bincount(labels).argmax()
+    mask = labels == largest
+    vertex_indices = mask.nonzero()[0]
+    tris_new = filter_reindex(mask, tris)
+    return vertex_indices, tris_new
 
 
 def get_per_triangle_normals(verts, tris, edges_uv=None):
