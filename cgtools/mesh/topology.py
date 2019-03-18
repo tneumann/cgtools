@@ -122,3 +122,7 @@ def double_triangle_area(verts, tris):
 
 def triangle_area(verts, tris):
     return double_triangle_area(verts, tris) / 2.
+
+
+def quads_to_tris(quads):
+    return quads[:, [[0, 1, 2], [0, 2, 3]]].reshape(-1, 3)
