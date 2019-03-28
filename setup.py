@@ -36,7 +36,7 @@ ext_modules = [
         'cgtools.mesh._intersections_ext',
         ['src/intersections.cpp'],
         include_dirs=[
-            'include',
+            'include/eigen',
             numpy.get_include(),
         ],
         language='c++'
