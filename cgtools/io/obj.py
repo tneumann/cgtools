@@ -2,6 +2,7 @@ import numpy as np
 from os import path
 import re
 
+
 # TODO: use \d  in triangle regex instead of [^\/\s]
 _triangle_regex = re.compile("^f\s+([^\/\s]+)/?\S*/?\S*\s+([^\/\s]+)/?\S*/?\S*\s+([^\/\s]+)", re.MULTILINE)
 _quad_regex = re.compile("^f\s+(\d+)/?\S*/?\S*\s+(\d+)/?\S*/?\S*\s+(\d+)/?\S*/?\S*\s+(\d+)", re.MULTILINE)
@@ -21,6 +22,17 @@ def _array_fromregex(f, regex, dtype):
     content = f.read()
     seq = regex.findall(content)
     return np.array(seq, dtype=dtype)
+
+
+def load_texture_filename_in_obj(filename):
+    tex_file = None
+    for line in open(filename).xreadlines():
+        if line.startswith('mtllib'):
+            mtl_file = path.join(path.dirname(filename), line.strip().split()[1])
+            for mtl_line in open(mtl_file).xreadlines():
+                if mtl_line.startswith('map_Kd'):
+                    tex_file = mtl_line.strip().split()[1]
+    return tex_file
 
 
 def load_obj(filename, load_normals=False, load_texcoords=False, load_texture=False, 
@@ -56,14 +68,8 @@ def load_obj(filename, load_normals=False, load_texcoords=False, load_texture=Fa
 
     if load_texture:
         from scipy.misc import imread
-
-        tex_file = None
-        for line in open(filename).xreadlines():
-            if line.startswith('mtllib'):
-                mtl_file = path.join(path.dirname(filename), line.strip().split()[1])
-                for mtl_line in open(mtl_file).xreadlines():
-                    if mtl_line.startswith('map_Kd'):
-                        tex_file = mtl_line.strip().split()[1]
+        
+        tex_file = load_texture_filename_in_obj(filename)
         if tex_file is None:
             raise IOError("Cannot read texture from %s" % filename)
         texture = imread(path.join(path.dirname(filename), tex_file))
