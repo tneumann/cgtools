@@ -47,3 +47,5 @@ venv/
 ENV/
 
 tmp
+
+.vscode/
