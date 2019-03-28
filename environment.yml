@@ -9,3 +9,4 @@ dependencies:
   - pybind11>=2.2.2
   - pytest>=3.3.2
   - scipy>=1.1.0
+  - eigen>=3.3
