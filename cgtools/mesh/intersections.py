@@ -1,1 +1,1 @@
-from _intersections_ext import ray_mesh_intersect
+from _intersections_ext import ray_mesh_intersect, closest_points_on_mesh

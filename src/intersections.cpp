@@ -1,10 +1,15 @@
 #include <limits>
 #include <Eigen/Geometry>
 #include <pybind11/pybind11.h>
+#include <pybind11/eigen.h>
 #include <pybind11/numpy.h>
+
+#include <igl/point_mesh_squared_distance.h>
 
 
 namespace py = pybind11;
+using namespace Eigen;
+
 typedef Eigen::Vector3d Vec3d;
 typedef Eigen::Vector2d Vec2d;
 
@@ -101,6 +106,36 @@ rayMeshIntersect(
 }
 
 
+std::tuple<VectorXd, VectorXi, MatrixX3d, MatrixX2d>
+closestPointOnMesh(const MatrixXd& P, const MatrixXd& V, const MatrixXi& tris) 
+{
+    VectorXd sq_dists;
+    MatrixX3d hit_pts;
+    VectorXi tri_ixs;
+    igl::point_mesh_squared_distance(P, V, tris, sq_dists, tri_ixs, hit_pts);
+
+    // determine uv coordinates of those closest hits
+    MatrixX2d hit_uv(hit_pts.rows(), 2);
+    for (int i = 0; i < P.rows(); ++i) {
+        Vector3d p = hit_pts.row(i);
+        Vector3i tri = tris.row(tri_ixs(i));
+        // setup local coordinate frame
+        Vector3d e10 = V.row(tri(1)) - V.row(tri(0));
+        Vector3d e20 = V.row(tri(2)) - V.row(tri(0));
+        Vector3d n = e10.cross(e20); // normal
+        Matrix3d F;
+        F << e10, e20, n;
+        // invert local coordinate frame to get
+        // frame-local coordinates
+        Vector3d v0 = hit_pts.row(i) - V.row(tri(0));
+        Vector3d uvw = F.inverse() * v0;
+        hit_uv(i, 0) = uvw(0);
+        hit_uv(i, 1) = uvw(1);
+    }
+
+    return std::make_tuple(sq_dists, tri_ixs, hit_pts, hit_uv);
+};
+
 PYBIND11_PLUGIN(_intersections_ext) {
     using namespace pybind11::literals;
 
@@ -109,8 +144,10 @@ PYBIND11_PLUGIN(_intersections_ext) {
             "verts"_a, "tris"_a, "ray_pts"_a, "ray_dirs"_a,
             "max_distance"_a = std::numeric_limits<double>::infinity(),
             "max_angle"_a = std::numeric_limits<double>::infinity(),
-            "allow_backface_hit"_a = true
-            );
+            "allow_backface_hit"_a = true);
+
+    m.def("closest_points_on_mesh", &closestPointOnMesh,
+          "points"_a, "vertices"_a, "triangles"_a);
 
     return m.ptr();
 }

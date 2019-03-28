@@ -37,6 +37,7 @@ ext_modules = [
         ['src/intersections.cpp'],
         include_dirs=[
             'include/eigen',
+            'include/libigl/include',
             numpy.get_include(),
         ],
         language='c++'
