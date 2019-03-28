@@ -19,6 +19,59 @@ def mesh_as_vtk_actor(verts, tris=None, lines=None, compute_normals=True, return
     else:
         return actor
 
+
+def mesh_as_vtk_polydata(verts, tris=None, uv=None, normals=None, tris_uv=None, tris_normals=None):
+    # do vertex and uv or normal topology differ? in that case, flatten those arrays
+    if tris is not None and (tris_uv is not None or tris_normals is not None):
+        if tris_normals is None:
+            tris_normals = tris
+        if tris_uv is None:
+            tris_uv = tris
+        verts_flat = verts[tris].reshape(-1, 3)
+        tris_flat = np.arange(len(verts_flat)).reshape(-1, 3)
+
+        pd = tvtk.PolyData(points=verts_flat, polys=tris_flat)
+        if uv is not None:
+            pd.point_data.t_coords = uv[tris_uv].reshape(-1, 2)
+        if normals is not None:
+            pd.point_data.normals = normals[tris_normals].reshape(-1, 3)
+    else:
+        # use data as-is
+        pd = tvtk.PolyData(points=verts)
+        if tris is not None:
+            pd.polys = tris
+        if uv is not None:
+            assert len(uv) == len(verts)
+            pd.point_data.t_coords = uv
+        if normals is not None:
+            assert len(normals) == len(verts)
+            pd.point_data.normals = normals
+
+    return pd
+
+
+def image_to_vtk_texture(img):
+    imgdata = tvtk.ImageData()
+    t = img[::-1].reshape(-1, 3).astype(np.uint8)
+    imgdata.point_data.scalars = t
+    imgdata.extent = (0, img.shape[0]-1, 0, img.shape[1]-1, 0, 0)
+    imgdata.dimensions = (img.shape[1], img.shape[0], 1)
+    vtk_texture = tvtk.Texture()
+    configure_input_data(vtk_texture, imgdata)
+    return vtk_texture
+
+
+def textured_vtk_actor(verts, tris, uv, img, tris_uv=None, normals=None, tris_normals=None):
+    vtk_texture = image_to_vtk_texture(img)
+    pd = mesh_as_vtk_polydata(verts, tris, uv, normals, tris_uv, tris_normals)
+
+    actor = polydata_actor(pd, compute_normals=False)
+    actor.texture = vtk_texture
+    actor.property.diffuse = 1
+
+    return actor
+
+
 def polydata_actor(polydata, compute_normals=True):
     """ create a vtk actor with given polydata as input """
     if compute_normals:
