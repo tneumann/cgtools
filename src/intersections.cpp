@@ -5,6 +5,7 @@
 #include <pybind11/numpy.h>
 
 #include <igl/point_mesh_squared_distance.h>
+#include <igl/AABB.h>
 
 
 namespace py = pybind11;
@@ -105,6 +106,37 @@ rayMeshIntersect(
     );
 }
 
+std::tuple<VectorXi, MatrixX2d, VectorXi>
+rayMeshIntersectFast(
+        const MatrixXd& verts, 
+        const MatrixXi& tris,
+        const MatrixXd& ray_pts, 
+        const MatrixXd& ray_dirs)
+{
+    igl::AABB<MatrixXd, 3> tree;
+    tree.init(verts, tris);
+
+    std::vector<std::pair<igl::Hit, int>> hits;
+    for (int i = 0; i < ray_pts.rows(); i++) {
+        igl::Hit hit;
+        if (tree.intersect_ray(verts, tris, ray_pts.row(i), ray_dirs.row(i), hit)) {
+            hits.emplace_back(hit, i);
+        }
+    }
+
+    VectorXi tri_ixs(hits.size());
+    MatrixX2d barys(hits.size(), 2);
+    VectorXi ray_ixs(hits.size());
+
+    for(int i = 0; i < hits.size(); i++) {
+        ray_ixs(i) = hits[i].second;
+        const igl::Hit & hit = hits[i].first;
+        tri_ixs(i) = hit.id;
+        barys.row(i) = Vec2d((double)hit.u, (double)hit.v);
+    }
+    
+    return std::make_tuple(tri_ixs, barys, ray_ixs);
+}
 
 std::tuple<VectorXd, VectorXi, MatrixX3d, MatrixX2d>
 closestPointOnMesh(const MatrixXd& P, const MatrixXd& V, const MatrixXi& tris) 
@@ -145,6 +177,9 @@ PYBIND11_PLUGIN(_intersections_ext) {
             "max_distance"_a = std::numeric_limits<double>::infinity(),
             "max_angle"_a = std::numeric_limits<double>::infinity(),
             "allow_backface_hit"_a = true);
+
+    m.def("ray_mesh_intersect_fast", &rayMeshIntersectFast,
+            "verts"_a, "tris"_a, "ray_pts"_a, "ray_dirs"_a);
 
     m.def("closest_points_on_mesh", &closestPointOnMesh,
           "points"_a, "vertices"_a, "triangles"_a);
