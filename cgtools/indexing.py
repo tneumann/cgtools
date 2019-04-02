@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import sparse
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from itertools import izip, count
 
 
@@ -46,6 +46,24 @@ def group_all(query, data=None):
     for q, d in izip(query, data):
         result[q].append(d)
     return dict(result)
+
+def group_all_keep_order(query, data=None):
+    """
+    Same as group_all, but returns an OrderedDict, keys are kept in the same order as they appear in query
+
+    >>> group_all_keep_order("haha")
+    OrderedDict([('h', [0, 2]), ('a', [1, 3])])
+    >>> group_all_keep_order("ahh")
+    OrderedDict([('a', [0]), ('h', [1, 2])])
+    """
+    if data is None:
+        data = count()
+    result = OrderedDict()
+    for q, d in izip(query, data):
+        if q not in result:
+            result[q] = []
+        result[q].append(d)
+    return result
 
 def group_all_array(query):
     """
