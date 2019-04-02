@@ -48,11 +48,10 @@ def get_edges_from_triangles(tris):
     [[0, 1], [0, 2], [1, 2], [1, 3], [1, 4], [2, 3], [3, 4]]
     """
     tris = np.array(tris)
-    all_edges = tris[:, [[0,1], [1,2], [2,0]]].reshape((-1, 2))
-    all_edges = np.column_stack((
-        np.minimum(all_edges[:,0], all_edges[:,1]),
-        np.maximum(all_edges[:,0], all_edges[:,1]) ))
-    return np.array(list(set(map(tuple, all_edges))))
+    all_edges = tris[:, [[0,1], [1,0], [1,2], [2,1], [2,0], [0,2]]].reshape((-1, 2))
+    A = sparse.coo_matrix((np.ones(len(all_edges)), all_edges.T))
+    A = sparse.triu(A, format='csr')  # format csr necessary to remove duplicate entries in COO format
+    return np.column_stack(A.nonzero())
 
 
 def edge_adjacency_matrix(tris, n_verts=None):
