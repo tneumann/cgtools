@@ -1,8 +1,4 @@
 import numpy as np
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
 
 
 def save_off(filename, vertices=None, faces=None, scalars=None, vmin=None, vmax=None):
