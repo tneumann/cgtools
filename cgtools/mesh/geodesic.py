@@ -1,6 +1,8 @@
 import numpy as np
 from scipy import sparse
 
+from _igl_ext import exact_geodesic
+
 from ..vector import veclen, normalized, sq_veclen
 from .laplacian import compute_mesh_laplacian
 from .gradient import gradient_op

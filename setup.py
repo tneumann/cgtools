@@ -42,6 +42,16 @@ ext_modules = [
         ],
         language='c++'
     ),
+    Extension(
+        'cgtools.mesh._igl_ext',
+        ['src/igl_ext.cpp'],
+        include_dirs=[
+            'include/eigen',
+            'include/libigl/include',
+            numpy.get_include(),
+        ],
+        language='c++'
+    ),
 ]
 
 
