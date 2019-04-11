@@ -17,6 +17,21 @@ def inverse_index_dict(_list):
     """
     return dict(zip(_list, range(len(_list))))
 
+def linear_search(array, targets):
+    """ search the (first) occurance of each item from the list of targets and return it's index, or -1 if it is not found 
+    >>> linear_search([1, 2, 1, 4], [1, 4])
+    array([0, 3])
+    >>> linear_search([1, 2, 1, 4], [5, 2, 1])
+    array([-1, 1, 0])
+    """
+    array = np.asarray(array)
+    results = np.full(len(targets), -1, np.int)
+    for i, target_i in enumerate(targets):
+        s = np.where(array == target_i)[0]
+        if len(s) > 0:
+            results[i] = s[0]
+    return results
+
 def occurance_mask(c1, c2):
     c1_set = set(c1)
     return np.array([c2_item in c1_set for c2_item in c2], np.bool)
