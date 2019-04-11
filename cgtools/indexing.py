@@ -263,11 +263,11 @@ def valid_indices(indices, array_shape, return_mask=False):
     else:
         return indices_masked
 
-def mask_from_indices(ix, count=None):
+def mask_from_indices(ix, count=0):
     """
     Given an array of 1d indices, return a mask array that has all those indices
     set to True, and the remaining indices set to Failse.
-    The returned mask has size of given count, or if count == None, 
+    The returned mask has size of given count, or if count == 0, 
     the length corresponds to the maximum element in ix.
 
     >>> print(mask_from_indices([1, 3]))
