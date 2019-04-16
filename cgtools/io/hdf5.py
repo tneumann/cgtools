@@ -9,13 +9,13 @@ def save_mesh_animation(filename, verts, tris, **kwargs):
     with h5py.File(filename, 'w') as f:
         f.create_dataset('verts', data=verts, compression='gzip')
         f['tris'] = tris
-        for k, v in kwargs.iteritems():
+        for k, v in kwargs.items():
             if k == 'attributes':
-                for an, av in v.iteritems():
+                for an, av in v.items():
                     f.attrs[an] = av
             else:
                 f[k] = v
-    print "saved mesh animation %s" % filename
+    print("saved mesh animation %s" % filename)
 
 def load_mesh_animation(filename, *additional_datasets):
     r = []
@@ -24,7 +24,7 @@ def load_mesh_animation(filename, *additional_datasets):
             if name in f:
                 r.append(f[name].value)
             else:
-                print "[warn] non-existent dataset %s requested, returning None" % name
+                print("[warn] non-existent dataset %s requested, returning None" % name)
                 r.append(None)
     return r
 
@@ -47,7 +47,7 @@ def save_blendshapes(filename, shapes, tris, blendshape_names=None):
                         if blendshape_names is not None and len(blendshape_names) >= i and blendshape_names[i-1] is not None \
                         else '%03d' % i
             f[name] = s
-    print "saved blendshapes %s" % filename
+    print("saved blendshapes %s" % filename)
 
 def save_components_as_blendshapes(filename, verts0, tris, components, names=None):
     blendshapes = components + verts0[np.newaxis]

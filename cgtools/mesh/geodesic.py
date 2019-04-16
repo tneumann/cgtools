@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import sparse
 
-from _igl_ext import exact_geodesic
+from ._igl_ext import exact_geodesic
 
 from ..vector import veclen, normalized, sq_veclen
 from .laplacian import compute_mesh_laplacian
@@ -12,8 +12,8 @@ try:
     from sksparse.cholmod import cholesky
     factorized = lambda A: cholesky(A, mode='simplicial')
 except ImportError:
-    print "CHOLMOD not found - trying to use slower LU factorization from scipy"
-    print "install scikits.sparse to use the faster cholesky factorization"
+    print("CHOLMOD not found - trying to use slower LU factorization from scipy")
+    print("install scikits.sparse to use the faster cholesky factorization")
     from scipy.sparse.linalg import factorized
 
 
@@ -41,7 +41,7 @@ class GeodesicDistanceComputation(object):
         e12 = verts[tris[:,2]] - verts[tris[:,1]]
         e20 = verts[tris[:,0]] - verts[tris[:,2]]
         # parameters for heat method
-        h = np.mean(map(veclen, [e01, e12, e20]))
+        h = np.mean(list(map(veclen, [e01, e12, e20])))
         t = m * h ** 2
         # pre-factorize poisson systems
         Lc, vertex_area = compute_mesh_laplacian(verts, tris, area_type='lumped_mass')

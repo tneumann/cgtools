@@ -30,7 +30,7 @@ def load_off(filename, no_colors=False):
     lines = [line for line in lines if line.strip() != '' and line[0] != '#']
     assert lines[0].strip() in ['OFF', 'COFF'], 'OFF header missing'
     has_colors = lines[0].strip() == 'COFF'
-    n_verts, n_faces, _ = map(int, lines[1].split())
+    n_verts, n_faces, _ = list(map(int, lines[1].split()))
     vertex_data = np.fromstring(
         ''.join(lines[2:2 + n_verts]), 
         sep=' ', dtype=np.float).reshape(n_verts, -1)

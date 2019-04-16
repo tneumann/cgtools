@@ -26,10 +26,10 @@ def _array_fromregex(f, regex, dtype):
 
 def load_texture_filename_in_obj(filename):
     tex_file = None
-    for line in open(filename).xreadlines():
+    for line in open(filename):
         if line.startswith('mtllib'):
             mtl_file = path.join(path.dirname(filename), line.strip().split()[1])
-            for mtl_line in open(mtl_file).xreadlines():
+            for mtl_line in open(mtl_file):
                 if mtl_line.startswith('map_Kd'):
                     tex_file = mtl_line.strip().split()[1]
     return tex_file

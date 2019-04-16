@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import sparse
 
-from topology import get_mesh_edges
+from .topology import get_mesh_edges
 
 
 def barycentric_matrix(uv, tris, num_verts):

@@ -36,7 +36,7 @@ def distribute_points(list_of_points, axes=(0, 2), n1=None, pad_factor=1.2, spac
 
     rng[axes[0]] = np.r_[ : n1 * spacing[axes[0]] : spacing[axes[0]]]
 
-    offsets = np.column_stack((map(np.ravel, np.meshgrid(*rng))))
+    offsets = np.column_stack((list(map(np.ravel, np.meshgrid(*rng)))))
     offsets = offsets[:len(list_of_points)]
 
     ret = [[p + o for p, o in zip(list_of_points, offsets)],]

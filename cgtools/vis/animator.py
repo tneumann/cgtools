@@ -119,7 +119,7 @@ class Animator(HasTraits):
         self.is_rendering = True
         if self._internal_generator is not None:
             try:
-                self._internal_generator.next()
+                next(self._internal_generator)
             except StopIteration: # is ok since generator should yield just once to render
                 pass 
             except: # catch and re-raise other errors
@@ -132,7 +132,7 @@ class Animator(HasTraits):
         scene.disable_render = True
         r = self._callable(self.current_frame)
         if isinstance(r, types.GeneratorType):
-            r.next()
+            next(r)
             # save away generator to yield when another frame has to be displayed
             self._internal_generator = r
         # render scene without dumb hourglass cursor, 
@@ -206,7 +206,7 @@ class Animator(HasTraits):
                                   show_time=True, can_cancel=True)
         progress.open()
         self.is_rendering_animation = True
-        for frame in xrange(self.render_from_frame, self.render_to_frame + 1):
+        for frame in range(self.render_from_frame, self.render_to_frame + 1):
             # move animation to desired frame, this will also render the scene
             self.current_frame = frame
             # prepare window to image writer

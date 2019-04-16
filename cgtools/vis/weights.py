@@ -36,7 +36,7 @@ class WeightsVisualization(HasTraits):
         HasTraits.__init__(self)
 
         if type(meshes) is dict:
-            names, verts, tris, weights = zip(*[(n, v, t, w) for n, (v, t, w) in meshes.iteritems()])
+            names, verts, tris, weights = list(zip(*[(n, v, t, w) for n, (v, t, w) in meshes.items()]))
         elif type(meshes) in [list, tuple]:
             names, verts, tris, weights = [], [], [], []
             for i, mesh in enumerate(meshes):
@@ -49,7 +49,7 @@ class WeightsVisualization(HasTraits):
                 else:
                     names.append(mesh[3])
         else:
-            raise ValueError, 'illegal value for parameter "meshes"'
+            raise ValueError('illegal value for parameter "meshes"')
 
         ## single arrays given?
         #share_verts, share_tris = False, False
@@ -72,7 +72,7 @@ class WeightsVisualization(HasTraits):
         if names is not None:
             assert len(set(names)) == len(names)
 
-        self._weights = map(_centered, weights) if center else weights
+        self._weights = list(map(_centered, weights)) if center else weights
         self._verts = verts
         self._tris = tris
         valid_weights = [w.shape[-1] - 1 for w in self._weights if w is not None]
@@ -195,9 +195,9 @@ class WeightsVisualization(HasTraits):
         if file_dialog.open() == OK:
             out_path = file_dialog.path
             if self.display_all:
-                items = [(None, k) for k in xrange(self._max_weight + 1)]
+                items = [(None, k) for k in range(self._max_weight + 1)]
             else:
-                items = product(self._names, xrange(self._max_weight + 1))
+                items = product(self._names, range(self._max_weight + 1))
             for name, k in items:
                 if name is not None:
                     self.selected_mesh = name

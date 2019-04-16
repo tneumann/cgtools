@@ -31,7 +31,7 @@ def test_closest_point_on_mesh():
     npt.assert_equal(hit_tri, [0])
 
     # brute force compute closest hit and compare
-    u, v = map(np.ravel, np.mgrid[:1:1000j, :1:1000j])
+    u, v = list(map(np.ravel, np.mgrid[:1:1000j, :1:1000j]))
     e1 = verts[1] - verts[0]
     e2 = verts[2] - verts[0]
     p = verts[np.newaxis, 0] + u[:, np.newaxis] * e1[np.newaxis] + v[:, np.newaxis] * e2[np.newaxis]

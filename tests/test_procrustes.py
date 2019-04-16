@@ -8,7 +8,7 @@ def test_procrustes3d():
     trials = 0
     while trials < 100:
         R = np.linalg.qr(np.random.uniform(-1, 1, size=(3,3)))[0]
-        print(np.linalg.det(R))
+        print((np.linalg.det(R)))
         if np.linalg.det(R) < 0:
             continue
         t = np.random.uniform(-2, 2, size=3)

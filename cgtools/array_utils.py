@@ -41,7 +41,7 @@ def concatenate_fill(arrays, axis=0, fill_value=None):
         return arrays[0]
 
     final_shape = [(sum if ax == axis else max)(a.shape[ax] for a in arrays)
-                   for ax in xrange(arrays[0].ndim)]
+                   for ax in range(arrays[0].ndim)]
     final_dtype = np.result_type(*arrays)
     if fill_value is None:
         if issubclass(final_dtype.type, np.floating):
@@ -56,7 +56,7 @@ def concatenate_fill(arrays, axis=0, fill_value=None):
     for a in arrays:
         target = [slice(0, a.shape[ax], 1) for ax in range(a.ndim)]
         target[axis] = slice(i, i + a.shape[axis], 1)
-        concat[target] = a
+        concat[tuple(target)] = a
         i += a.shape[axis]
 
     return concat

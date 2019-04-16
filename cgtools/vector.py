@@ -1,5 +1,5 @@
 import numpy as np
-from fastmath import inv3, matvec
+from .fastmath import inv3, matvec
 
 
 __all__ = [

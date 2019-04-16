@@ -1,5 +1,5 @@
 import numpy as np
-import vector as V
+from . import vector as V
 
 
 def rbm_to_dualquat(rbm):
@@ -90,8 +90,8 @@ def dq_skinning_py(pts, BW, dqs, inverse=False):
     # convert them back to rigid body motion (4x4)
     M = dualquats_to_rbms(blendq)
     if inverse == True:
-        print M
-        M = np.array(map(np.linalg.inv, M))
+        print(M)
+        M = np.array(list(map(np.linalg.inv, M)))
     # transform points with final matrix
     return V.dehom( np.sum(M * V.hom(pts)[:,np.newaxis,:], axis=2) )
 
@@ -114,8 +114,8 @@ def blend_skinning(pts, BW, rbms, method='lbs'):
         return np.sum(BW[:,:,np.newaxis] * transformed_pts, axis=1)
     elif method == 'dq':
         rbms = np.asanyarray(rbms)
-        dqs = np.array(map(rbm_to_dualquat, rbms))
+        dqs = np.array(list(map(rbm_to_dualquat, rbms)))
         return dq_skinning(pts, BW, dqs)
     else:
-        raise ValueError, "Unknown skinning method"
+        raise ValueError("Unknown skinning method")
 

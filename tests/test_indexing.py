@@ -10,12 +10,12 @@ def test_valid_indices_randomized_tests():
         indices = np.random.randint(-5, 15, (500, axes))
         indices_valid = valid_indices(indices, shape)
         raised = False
-        print "--"
-        print indices.shape
-        print indices_valid.shape
-        print indices_valid
+        print("--")
+        print(indices.shape)
+        print(indices_valid.shape)
+        print(indices_valid)
         try:
-            a[zip(*indices_valid)]
+            a[tuple(zip(*indices_valid))]
         except IndexError:
             raised = True
         assert not raised

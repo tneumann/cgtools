@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 
 from collections import defaultdict
 import numpy as np
@@ -38,7 +38,7 @@ def triangle_triangle_adjacency_list(tris):
         tri_by_edge[(min(i, j), max(i, j))].append(tri_index)
         tri_by_edge[(min(j, k), max(j, k))].append(tri_index)
         tri_by_edge[(min(k, i), max(k, i))].append(tri_index)
-    return np.array([ts for ts in tri_by_edge.values() if len(ts) == 2])
+    return np.array([ts for ts in list(tri_by_edge.values()) if len(ts) == 2])
 
 
 def get_edges_from_triangles(tris):
@@ -106,7 +106,7 @@ def get_vertex_areas(verts, tris):
     PQ = verts[tris[:, 0]] - verts[tris[:, 1]]
     RP = verts[tris[:, 2]] - verts[tris[:, 0]]
     lump_area = V.veclen(np.cross(PQ, RP)) / 6.
-    area = sum(np.bincount(tris[:,i], lump_area, minlength=len(verts)) for i in xrange(3))
+    area = sum(np.bincount(tris[:,i], lump_area, minlength=len(verts)) for i in range(3))
     return area
 
 
@@ -125,3 +125,4 @@ def triangle_area(verts, tris):
 
 def quads_to_tris(quads):
     return quads[:, [[0, 1, 2], [0, 2, 3]]].reshape(-1, 3)
+

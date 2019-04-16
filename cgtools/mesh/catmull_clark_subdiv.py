@@ -33,13 +33,13 @@ class CatmullClarkSubdiv(object):
                 edge_ijs_by_vert[quad[k]].append(ij)
 
         # ensure all edges have 2 neighboring faces
-        assert all(len(v) == 2 for v in quads_by_edge_ij.values())
+        assert all(len(v) == 2 for v in list(quads_by_edge_ij.values()))
         # ensure all quads reference 4 edges
-        assert all(all(i is not None for i in quad) for quad in edges_by_quads.values())
+        assert all(all(i is not None for i in quad) for quad in list(edges_by_quads.values()))
 
         # make unique edge indices
         edges_ij_uniq = np.unique(edges_ij, axis=0)
-        edge_ix_by_ij = inverse_index_dict(map(tuple, edges_ij_uniq))
+        edge_ix_by_ij = inverse_index_dict(list(map(tuple, edges_ij_uniq)))
 
         quads_hi = []
         for quad_ix, (i0, i1, i2, i3) in enumerate(quads):
@@ -65,18 +65,18 @@ class CatmullClarkSubdiv(object):
 
         # construct edge interpolation matrix
         E_triplets = []
-        for (i, j), edge_ix in edge_ix_by_ij.iteritems():
+        for (i, j), edge_ix in edge_ix_by_ij.items():
             q1, q2 = quads_by_edge_ij[(i, j)]
             E_triplets.append((edge_ix, i, 0.25))
             E_triplets.append((edge_ix, j, 0.25))
             E_triplets.append((edge_ix, q1 + n_verts, 0.25))
             E_triplets.append((edge_ix, q2 + n_verts, 0.25))
-        E_i, E_j, E_data = zip(*E_triplets)
+        E_i, E_j, E_data = list(zip(*E_triplets))
         self._E_intp = sparse.csr_matrix((E_data, (E_i, E_j)))
 
         # construct vertex interpolation matrix
         V_triplets = []
-        for vert_ix in xrange(n_verts):
+        for vert_ix in range(n_verts):
             n = len(quads_by_vert[vert_ix])
             # put coefficients that compute F
             adj_quads = quads_by_vert[vert_ix]
@@ -91,7 +91,7 @@ class CatmullClarkSubdiv(object):
             # put coefficients to compute (n - 3) * orig
             V_triplets.append((vert_ix, vert_ix, (n - 3.) / float(n)))
         
-        V_i, V_j, V_data = zip(*V_triplets)
+        V_i, V_j, V_data = list(zip(*V_triplets))
         self._V_intp = sparse.csr_matrix((V_data, (V_i, V_j)))
 
     def __call__(self, attrs):

@@ -1,18 +1,18 @@
 import numpy as np
 from scipy import sparse
 from collections import defaultdict, OrderedDict
-from itertools import izip, count
+from itertools import count
 
 
 def inverse_index_dict(_list):
     """ build a dict that maps items to their index in given _list
 
-    >>> inverse_index_dict(['zero', 'one', 'two'])
-    {'zero': 0, 'two': 2, 'one': 1}
+    >>> inverse_index_dict(['zero', 'one', 'two']) == {'zero': 0, 'two': 2, 'one': 1}
+    True
 
     be careful with collisions, as they are not handled correctly (TODO?)
-    >>> inverse_index_dict([55, 66, 77, 55])
-    {66: 1, 77: 2, 55: 3}
+    >>> inverse_index_dict([55, 66, 77, 55]) == {66: 1, 77: 2, 55: 3}
+    True
     
     """
     return dict(zip(_list, range(len(_list))))
@@ -58,7 +58,7 @@ def group_all(query, data=None):
     if data is None:
         data = count()
     result = defaultdict(list)
-    for q, d in izip(query, data):
+    for q, d in zip(query, data):
         result[q].append(d)
     return dict(result)
 
@@ -74,7 +74,7 @@ def group_all_keep_order(query, data=None):
     if data is None:
         data = count()
     result = OrderedDict()
-    for q, d in izip(query, data):
+    for q, d in zip(query, data):
         if q not in result:
             result[q] = []
         result[q].append(d)
@@ -86,8 +86,6 @@ def group_all_array(query):
 
     >>> group_all_array([1, 2, 1, 2, 3])
     {1: array([0, 2]), 2: array([1, 3]), 3: array([4])}
-    >>> type(group_all_array([1, 2, 1, 2, 3])[1])
-    <type 'numpy.ndarray'>
     """
     values, inverse = np.unique(query, return_inverse=True)
     return {v: np.flatnonzero(inverse == i) for i, v in enumerate(values)}

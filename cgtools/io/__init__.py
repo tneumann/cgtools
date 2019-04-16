@@ -12,7 +12,7 @@ def load_mesh(filename):
     }
     ext = path.splitext(filename)[1].lower()[1:]
     if ext not in loaders:
-        raise IOError("No loader for %s extension known, available file formats are: %s" % (ext, loaders.keys()))
+        raise IOError("No loader for %s extension known, available file formats are: %s" % (ext, list(loaders.keys())))
     return loaders[ext](filename)
 
 
@@ -23,5 +23,5 @@ def save_mesh(filename, verts, tris, *args, **kw):
     }
     ext = path.splitext(filename)[1].lower()[1:]
     if ext not in writers:
-        raise IOError("No known writer for %s extension known, available file formats are: %s" % (ext, loaders.keys()))
+        raise IOError("No known writer for %s extension known, available file formats are: %s" % (ext, list(loaders.keys())))
     return writers[ext](filename, verts, tris, *args, **kw)

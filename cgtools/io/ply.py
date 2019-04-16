@@ -10,11 +10,11 @@ def save_pointcloud(filename, points, point_colors=None):
     """
     points = np.asanyarray(points)
     if not points.ndim == 2 and points.shape[-1] == 3:
-        raise ValueError, "points must be an n x 3 array of 3d point coordinates"
+        raise ValueError("points must be an n x 3 array of 3d point coordinates")
     if point_colors is not None:
         point_colors = np.asanyarray(point_colors)
         if not point_colors.shape == points.shape:
-            raise ValueError, "point_colors must be an n x 3 array of rgb values with the same size as points"
+            raise ValueError("point_colors must be an n x 3 array of rgb values with the same size as points")
     header = [
         "ply",
         "format ascii 1.0",
