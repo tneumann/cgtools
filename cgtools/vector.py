@@ -174,6 +174,8 @@ def assemble_3x4(rotations, translations):
     >>> np.all(Ms[:, :, 3] == ts)
     True
     """
+    translations = np.asarray(translations)
+    rotations = np.asarray(rotations)
     if rotations.ndim not in [2, 3] or rotations.shape[-2:] != (3, 3):
         raise ValueError("requires rotations argument to be one or more 3x3 matrices, so the shape should be either (3, 3) or (n, 3, 3)")
     if translations.ndim not in [1, 2] or translations.shape[-1] != 3:
