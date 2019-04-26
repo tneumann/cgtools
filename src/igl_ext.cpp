@@ -31,7 +31,8 @@ PYBIND11_MODULE(_igl_ext, m) {
 
             Map<RowVectorXd> dists_flat(dists.data(), dists.size());
             return dists_flat;
-        }, "",
+        }, 
+        py::call_guard<py::gil_scoped_release>(),
         py::arg("verts"), py::arg("tris"), py::arg("src_vert_indices")
     );
 }
