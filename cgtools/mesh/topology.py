@@ -66,9 +66,12 @@ def edge_adjacency_matrix(tris, n_verts=None):
     ij = np.r_[np.c_[tris[:, 0], tris[:, 1]],
                np.c_[tris[:, 0], tris[:, 2]],
                np.c_[tris[:, 1], tris[:, 2]]]
-    return sparse.csr_matrix(
+    A = sparse.csr_matrix(
         (np.ones(len(ij)), ij.T),
         shape=(n_verts, n_verts))
+    A = A.T + A
+    A.data[:] = 1
+    return A
 
 
 def largest_connected_component(tris):
