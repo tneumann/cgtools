@@ -6,7 +6,7 @@ from scipy import sparse
 from scipy.sparse.csgraph import connected_components
 
 from .. import vector as V
-from ..indexing import filter_reindex
+from ..indexing import filter_reindex, take_reindex
 
 
 def get_mesh_edges(verts, tris):
@@ -126,3 +126,8 @@ def triangle_area(verts, tris):
 def quads_to_tris(quads):
     return quads[:, [[0, 1, 2], [0, 2, 3]]].reshape(-1, 3)
 
+
+def filter_triangles(vert_ix_or_mask, tris):
+    vert_ix_or_mask = np.asarray(vert_ix_or_mask)
+    fn = filter_reindex if vert_ix_or_mask.dtype == np.bool else take_reindex
+    return fn(vert_ix_or_mask, tris)

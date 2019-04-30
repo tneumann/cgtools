@@ -205,6 +205,79 @@ def filter_reindex(condition, indices):
     return reindex[indices][ind_mask]
 
 
+def take_reindex(target_ixs, indices):
+    """
+    Similar to filter_reindex, but filters by index selection instead of condition/mask.
+    Say you have target[indices] and now you filter target by only selecting some indices
+    target[target_ixs], with target_ixs = [2, 5, 6] for example. 
+    Then, target[target_ixs][indices] will not work anymore.
+    Use take_reindex to fix that: target[target_ixs][take_reindex(target_ixs, indices)]
+
+    To explain this better, let us look at an example. Let's say you have the following data:
+    >>> data = np.array(['a', 'b', 'c', 'd', 'e'])
+    
+    You also have another array that consists of indices into this array
+    >>> indices = np.array([0, 3, 2, 0])
+    >>> print(data[indices])
+    ['a' 'd' 'c' 'a']
+
+    Now, say you are selecting some elements in your data array
+    >>> sel = [3, 0]
+    >>> sel_data = data[sel]
+    >>> print(sel_data)
+    ['d' 'a']
+
+    The problem is that your index array doesn't correctly reference the new filtered data array
+    >>> sel_data[indices]
+    Traceback (most recent call last):
+        ...
+    IndexError: index 3 is out of bounds for axis 1 with size 2
+
+    Based on an old index array, this method returns a new index array 
+    that re-indices into the data array as if the selection was applied to this array, so
+    >>> sel_indices = take_reindex(sel, indices)
+    >>> print(sel_indices)
+    [1 0 1]
+    >>> print(sel_data[sel_indices])
+    ['a' 'd' 'a']
+
+    Note that in comparison to filter_reindex, this might reorder everything according to the
+    order of the selection:
+    >>> indices = np.array([1, 4, 1, 4])
+    >>> print(take_reindex([4, 1], indices))
+    [1 0 1 0]
+    >>> print(take_reindex([1, 4], indices))
+    [0 1 0 1]
+
+    Also works for n-dim arrays, for example to filter a mesh. 
+    E.g. given a list of vertices in 2D.
+    >>> verts = np.array([(0, 0), (1, 0), (1, 1), (0, 1), (0, 2)])
+
+    And a list of triangles:
+    >>> triangles = np.array([(0, 1, 2), (0, 2, 3), (3, 2, 4)])
+
+    Lets say we want to filter some of the vertices:
+    >>> vert_ixs = [2, 1, 0, 4]
+    >>> verts_new = verts[vert_ixs]
+
+    Now, if we filter the vertices and keep using the triangles, we will get an index error:
+    >>> verts_new[triangles]
+    Traceback (most recent call last):
+        ...
+    IndexError: ...
+
+    This can be fixed by this method:
+    >>> print(take_reindex(vert_ixs, triangles))
+    [[2 1 0]]
+    >>> triangles_new = take_reindex(vert_ixs, triangles)
+    >>> verts_new[triangles_new].tolist()
+    [[[0, 0], [1, 0], [1, 1]]]
+    """
+    masked_ind = filter_reindex(mask_from_indices(target_ixs, indices.max() + 1), indices)
+    reindex = np.argsort(target_ixs)
+    return reindex[masked_ind]
+
+
 def valid_indices(indices, array_shape, return_mask=False):
     """
     Returns only the valid indices that fall into array_shape.
