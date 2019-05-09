@@ -84,7 +84,7 @@ def polydata_actor(polydata, compute_normals=True):
     return actor
 
 
-def vismesh(pts, tris, color=None, edge_visibility=False, shader=None, triangle_scalars=None, colors=None, **kwargs):
+def vismesh(pts, tris, color=None, edge_visibility=False, shader=None, triangle_scalars=None, colors=None, nan_color=None, **kwargs):
     if 'scalars' in kwargs and np.asarray(kwargs['scalars']).ndim == 2:
         colors = kwargs['scalars']
         del kwargs['scalars']
@@ -114,6 +114,11 @@ def vismesh(pts, tris, color=None, edge_visibility=False, shader=None, triangle_
         normals = tvtk.PolyDataNormals(splitting=False)
         configure_input_data(normals, tm.mlab_source.dataset)
         configure_input(tm.actor.mapper, normals)
+    if nan_color is not None:
+        if len(nan_color) == 3:
+            nan_color = list(nan_color) + [1]
+        tm.module_manager.scalar_lut_manager.lut.nan_color = nan_color
+        tm.update_pipeline()
     return tm
 
 def compute_normals(pts, faces):
