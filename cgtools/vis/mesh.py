@@ -2,6 +2,8 @@ import numpy as np
 from mayavi import mlab
 from tvtk.api import tvtk
 from tvtk.common import configure_input, configure_input_data
+import traits.api as ta
+import traitsui.api as tu
 
 
 
@@ -154,3 +156,51 @@ def viscroud(meshes, axis=0, padding=1.2, **kwargs):
     return tms
 
 
+class MultiMeshViewer(ta.HasTraits):
+    visible = ta.Enum(values='_names')
+    show_edges = ta.Bool(False)
+    _names = ta.List()
+
+    def __init__(self, list_verts, list_tris, names=None, fig=None, **kw):
+        super(MultiMeshViewer, self).__init__(**kw)
+
+        if fig is None:
+            self._fig = mlab.figure(bgcolor=(1, 1, 1))
+        else:
+            self._fig = fig
+
+        if names is None:
+            names = map(str, range(len(list_verts)))
+        self._names = list(names)
+
+        self._actors = {}
+        for name, verts, tris in zip(self._names, list_verts, list_tris):
+            actor, _ = mesh_as_vtk_actor(verts, tris)
+            actor.property.set(
+                ambient=0.0,
+                specular=0.15, 
+                specular_power=128., 
+                diffuse=0.8,
+            )
+            self._fig.scene.add_actor(actor)
+            self._actors[name] = actor
+
+        self.visible = self._names[0]
+
+    @ta.on_trait_change('visible, show_edges, morph_target, morph_alpha, show_distance')
+    def _update(self):
+        for a in self._actors.values():
+            a.visibility = False
+            a.property.edge_visibility = self.show_edges
+        self._actors[self.visible].visibility = True
+        self._fig.scene.render()
+
+    view = tu.View(
+        tu.Item('visible'),
+        tu.Item('show_edges', name='Wireframe'),
+        title="MultiMeshViewer"
+    )
+
+
+def vis_multimesh(list_verts, list_tris, **kw):
+    MultiMeshViewer(list_verts, list_tris, **kw).configure_traits()
