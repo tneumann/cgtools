@@ -53,10 +53,8 @@ def distribute_points(list_of_points, axes=(0, 2), n1=None, pad_factor=1.2, spac
 
 
 def distribute_meshes(list_of_points, list_of_faces, **kwargs):
-    ret1 = distribute_points(list_of_points, **kwargs)
-    ret2 = merge_meshes(ret1[0], list_of_faces)
-    ret2 = list(ret2) + ret1[1:]
-    return ret2
+    list_points_distr = distribute_points(list_of_points, **kwargs)
+    return merge_meshes(list_points_distr, list_of_faces)
 
 
 def duplicate_and_distribute_mesh(verts, faces, n, **kwargs):
@@ -69,9 +67,11 @@ class Croud():
         _, self.offsets = distribute_points(list_of_points, **kwargs_for_distribute)
 
     def distribute(self, list_of_points, list_of_faces=None):
+        if len(list_of_points) != len(self.offsets):
+            raise ValueError("cannot distribute a %d meshes in a croud that was set up with %d meshes" %
+                             (len(list_of_points), len(self.offsets)))
         distributed_verts = [p + o for p, o in zip(list_of_points, self.offsets)]
         if list_of_faces is None:
             return np.vstack(distributed_verts)
         else:
             return merge_meshes(distributed_verts, list_of_faces)
-
