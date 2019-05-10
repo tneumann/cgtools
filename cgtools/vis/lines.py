@@ -1,7 +1,10 @@
+import numpy as np
 from mayavi import mlab
 
 
 def vislines(from_points, to_points, **kwargs):
+    from_points = np.asarray(from_points)
+    to_points = np.asarray(to_points)
     x, y, z = from_points.T
     u, v, w = (to_points - from_points).T
     kw = dict(scale_factor=1, scale_mode='vector', mode='2ddash', line_width=1)
