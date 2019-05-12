@@ -13,7 +13,7 @@ def merge_meshes(list_of_verts, list_of_faces):
     return merged_verts, np.vstack((merged_tris))
 
 
-def distribute_points(list_of_points, axes=(0, 2), n1=None, pad_factor=1.2, spacing=None, return_spacing=False, return_offsets=False):
+def distribute_points(list_of_points, axes=(0, 2), n1=None, pad_factor=1.2, spacing=None):
     if isinstance(axes, int):
         axes = [axes]
     if len(axes) > 2:
@@ -39,22 +39,13 @@ def distribute_points(list_of_points, axes=(0, 2), n1=None, pad_factor=1.2, spac
     offsets = np.column_stack((list(map(np.ravel, np.meshgrid(*rng)))))
     offsets = offsets[:len(list_of_points)]
 
-    ret = [[p + o for p, o in zip(list_of_points, offsets)],]
-
-    if return_spacing:
-        ret.append(spacing)
-    if return_offsets:
-        ret.append(offsets)
-
-    if len(ret) == 1:
-        return ret[0]
-    else:
-        return ret
+    ret = [p + o for p, o in zip(list_of_points, offsets)]
+    return ret, spacing, offsets
 
 
 def distribute_meshes(list_of_points, list_of_faces, **kwargs):
-    list_points_distr = distribute_points(list_of_points, **kwargs)
-    return merge_meshes(list_points_distr, list_of_faces)
+    list_points_distr, spacing, offsets = distribute_points(list_of_points, **kwargs)
+    return list(merge_meshes(list_points_distr, list_of_faces)) + [spacing, offsets]
 
 
 def duplicate_and_distribute_mesh(verts, faces, n, **kwargs):
@@ -63,8 +54,7 @@ def duplicate_and_distribute_mesh(verts, faces, n, **kwargs):
 
 class Croud():
     def __init__(self, list_of_points, **kwargs_for_distribute):
-        kwargs_for_distribute['return_offsets'] = True
-        _, self.offsets = distribute_points(list_of_points, **kwargs_for_distribute)
+        _, _, self.offsets = distribute_points(list_of_points, **kwargs_for_distribute)
 
     def distribute(self, list_of_points, list_of_faces=None):
         if len(list_of_points) != len(self.offsets):
