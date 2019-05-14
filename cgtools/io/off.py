@@ -35,7 +35,7 @@ def load_off(filename, no_colors=False):
         ''.join(lines[2:2 + n_verts]), 
         sep=' ', dtype=np.float).reshape(n_verts, -1)
     if n_faces > 0:
-        faces = np.fromstring(''.join(lines[2+n_verts:]), 
+        faces = np.fromstring(''.join(lines[2+n_verts: 2+n_verts+n_faces]), 
                               sep=' ', dtype=np.int).reshape(n_faces, -1)[:, 1:]
     else:
         faces = None
