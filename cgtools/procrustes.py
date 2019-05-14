@@ -1,5 +1,7 @@
 import numpy as np
 
+from . import vector as V
+
 
 def procrustes3d(frompts, topts, allow_reflection=False):
     """
@@ -37,3 +39,8 @@ def procrustes(frompts, topts, allow_reflection=False):
         E = np.diag([1, 1, d])
         R = np.dot(U, np.dot(E, Vt))
     return R
+
+
+def rigid_align(frompts, topts, allow_reflection=False):
+    M = procrustes3d(frompts, topts, allow_reflection=allow_reflection)
+    return V.transform(frompts, M)
