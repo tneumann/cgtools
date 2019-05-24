@@ -1,23 +1,29 @@
 import numpy as np
 
 
-def save_off(filename, vertices=None, faces=None, scalars=None, vmin=None, vmax=None):
+def save_off(filename, vertices=None, faces=None, scalars=None, vmin=None, vmax=None, colors=None):
     if vertices is None:
         vertices = []
     if faces is None:
         faces = []
-    has_color = scalars is not None
+    has_color = scalars is not None or colors is not None
     with open(filename, 'w') as f:
         f.write("%s\n%d %d 0\n" % (['OFF', 'COFF'][has_color], len(vertices), len(faces)))
         if len(vertices) > 1:
             if has_color:
-                import matplotlib as mpl
-                import matplotlib.cm as cm
+                if scalars is not None:
+                    import matplotlib as mpl
+                    import matplotlib.cm as cm
 
-                norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
-                rgba = cm.ScalarMappable(norm=norm, cmap=cm.jet).to_rgba(scalars)
+                    norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
+                    rgba = cm.ScalarMappable(norm=norm, cmap=cm.jet).to_rgba(scalars)
 
-                np.savetxt(f, np.hstack((vertices, rgba[:, :3])))
+                elif colors is not None:
+                    rgba = colors
+                    if rgba.dtype != np.uint8:
+                        rgba = (rgba * 255).astype(np.uint8)
+
+                np.savetxt(f, np.hstack((vertices, rgba[:, :3])), fmt="%.12f %.12f %.12f %d %d %d")
             else:
                 np.savetxt(f, vertices, fmt="%.12f %.12f %.12f")
         if len(faces) > 1:
