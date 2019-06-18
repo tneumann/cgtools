@@ -127,6 +127,8 @@ def triangle_area(verts, tris):
 
 
 def quads_to_tris(quads):
+    if quads.shape[1] == 3:  # already triangles?
+        return quads
     return quads[:, [[0, 1, 2], [0, 2, 3]]].reshape(-1, 3)
 
 
