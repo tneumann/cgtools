@@ -174,6 +174,53 @@ py::array_t<float_t> cross3(
 }
 
 
+template<typename float_t>
+py::array_t<float_t> multikron(
+        py::array_t<float_t, py::array::c_style> & a,
+        py::array_t<float_t, py::array::c_style> & b
+    )
+{
+    auto a_buf = a.request();
+    float_t *p_a = (float_t*)a_buf.ptr;
+    auto b_buf = b.request();
+    float_t *p_b = (float_t*)b_buf.ptr;
+
+    const auto n_rows_a = a_buf.shape[1];
+    const auto n_cols_a = a_buf.shape[2];
+    const auto n_rows_b = b_buf.shape[1];
+    const auto n_cols_b = b_buf.shape[2];
+
+    auto result = py::array_t<float_t, py::array::c_style>(
+            {a_buf.shape[0], n_rows_a * n_rows_b, n_cols_a * n_cols_b});
+    auto result_buf = result.request();
+    float_t *p_res = (float_t*)result_buf.ptr;
+
+    for (size_t idx = 0; idx < a_buf.shape[0]; idx++) {
+        // iterate over rows of a
+        for (size_t row_a = 0; row_a < n_rows_a; row_a++) {
+            // iterate over rows of b
+            for (size_t row_b = 0; row_b < n_rows_b; row_b++) {
+                // iterate over columns of a
+                for (size_t col_a = 0; col_a < n_cols_a; col_a++) {
+                    // iterate over columns of b
+                    for (size_t col_b = 0; col_b < n_cols_b; col_b++) {
+                        const float_t ai = p_a[row_a * n_cols_a + col_a];
+                        const float_t bi = p_b[row_b * n_cols_b + col_b];
+                        *p_res = ai * bi;
+                        p_res++;
+                    }
+                }
+            }
+        }
+        // next matrix
+        p_a += n_cols_a * n_rows_a;
+        p_b += n_cols_b * n_rows_b;
+    }
+
+    return result;
+}
+
+
 PYBIND11_PLUGIN(_fastmath_ext) {
     py::module m("_fastmath_ext");
     m.def("inv3", &inv3<float>);
@@ -183,6 +230,7 @@ PYBIND11_PLUGIN(_fastmath_ext) {
     m.def("matmat", &matmat<double>);
     m.def("matvec", &matvec<double>);
     m.def("cross3", &cross3<double>);
+    m.def("multikron", &multikron<double>);
 
     return m.ptr();
 }

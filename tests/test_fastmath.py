@@ -1,5 +1,5 @@
 import numpy as np
-from cgtools.fastmath import matmat, matvec, inv2, inv3, cross3
+from cgtools.fastmath import matmat, matvec, inv2, inv3, cross3, multikron
 
 
 def test_matmat_stride0():
@@ -139,3 +139,48 @@ def test_cross3():
     c_numpy = np.cross(a, b)
     c_fast = cross3(a, b)
     np.testing.assert_allclose(c_numpy, c_fast)
+
+def test_multikron_eqshape():
+    a = np.random.random((31, 4, 4))
+    b = np.random.random((31, 4, 4))
+    r1 = multikron(a, b)
+    r2 = np.array(list(map(np.kron, a, b)))
+    np.testing.assert_allclose(r1, r2)
+
+def test_multikron_eqshape():
+    a = np.random.random((31, 4, 4))
+    b = np.random.random((31, 4, 4))
+    r1 = multikron(a, b)
+    r2 = np.array(list(map(np.kron, a, b)))
+    np.testing.assert_allclose(r1, r2)
+
+def test_multikron_ndim():
+    a = np.random.random((10, 11, 2, 4))
+    b = np.random.random((10, 11, 4, 3))
+    r1 = multikron(a, b)
+    r2 = np.array(list(map(np.kron, a.reshape(-1, 2, 4), b.reshape(-1, 4, 3)))).reshape(10, 11, 2*4, 4*3)
+    np.testing.assert_allclose(r1, r2)
+
+def test_multikron_noncontiguous():
+    # a non-contiguous
+    a = np.random.random((10, 3, 3)).swapaxes(1, 2)
+    b = np.random.random((10, 3, 3))
+    assert not a.flags.contiguous
+    r1 = multikron(a, b)
+    r2 = np.array(list(map(np.kron, a, b)))
+    np.testing.assert_allclose(r1, r2)
+    # b non-contiguous
+    a = np.random.random((10, 3, 4))
+    b = np.random.random((10, 3, 4)).swapaxes(1, 2)
+    assert not b.flags.contiguous
+    r1 = multikron(a, b)
+    r2 = np.array(list(map(np.kron, a, b)))
+    np.testing.assert_allclose(r1, r2)
+    # both non-contiguous
+    a = np.random.random((10, 3, 5)).swapaxes(1, 2)
+    b = np.random.random((10, 6, 3)).swapaxes(1, 2)
+    assert not a.flags.contiguous
+    assert not b.flags.contiguous
+    r1 = multikron(a, b)
+    r2 = np.array(list(map(np.kron, a, b)))
+    np.testing.assert_allclose(r1, r2)
