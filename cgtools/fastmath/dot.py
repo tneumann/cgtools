@@ -27,11 +27,16 @@ def matmat(a, b):
         return np.dot(a, b)
     if a.shape[-1] != b.shape[-2]:
         raise ValueError("arrays must have suitable shape for matrix multiplication")
+
     if a.shape[:-2] != b.shape[:-2]:
-        b = np.broadcast_to(b, a.shape[:-2] + b.shape[-2:])
-    a_contig = a.reshape(-1, a.shape[-2], a.shape[-1])
-    b_contig = b.reshape(-1, b.shape[-2], b.shape[-1])
-    return _fastmath_ext.matmat(a_contig, b_contig).reshape(a.shape[:-2] + (a.shape[-2], b.shape[-1]))
+        shp = np.broadcast(a[..., 0, 0], b[..., 0, 0]).shape
+        a_bc = np.broadcast_to(a, shp + a.shape[-2:])
+        b_bc = np.broadcast_to(b, shp + b.shape[-2:])
+    else:
+        a_bc, b_bc = a, b
+    a_contig = a_bc.reshape(-1, a.shape[-2], a.shape[-1])
+    b_contig = b_bc.reshape(-1, b.shape[-2], b.shape[-1])
+    return _fastmath_ext.matmat(a_contig, b_contig).reshape(a_bc.shape[:-2] + (a.shape[-2], b.shape[-1]))
 
 
 def matvec(matrices, vectors):
@@ -59,7 +64,11 @@ def matvec(matrices, vectors):
     if matrices.shape[-1] != vectors.shape[-1]:
         raise ValueError("matrices and vectors must be compatible for matrix-vector multiplication")
     if matrices.shape[:-2] != vectors.shape[:-1]:
-        vectors = np.broadcast_to(vectors, matrices.shape[:-2] + vectors.shape[-1:])
-    matrices_contig = matrices.reshape(-1, matrices.shape[-2], matrices.shape[-1])
-    vectors_contig = vectors.reshape(-1, vectors.shape[-1])
-    return _fastmath_ext.matvec(matrices_contig, vectors_contig).reshape(matrices.shape[:-2] + (matrices.shape[-2], ))
+        shp = np.broadcast(matrices[..., 0, 0], vectors[..., 0]).shape
+        matrices_bc = np.broadcast_to(matrices, shp + matrices.shape[-2:])
+        vectors_bc = np.broadcast_to(vectors, shp + vectors.shape[-1:])
+    else:
+        matrices_bc, vectors_bc = matrices, vectors
+    matrices_contig = matrices_bc.reshape(-1, matrices.shape[-2], matrices.shape[-1])
+    vectors_contig = vectors_bc.reshape(-1, vectors.shape[-1])
+    return _fastmath_ext.matvec(matrices_contig, vectors_contig).reshape(matrices_bc.shape[:-2] + (matrices.shape[-2], ))

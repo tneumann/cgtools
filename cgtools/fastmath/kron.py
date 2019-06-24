@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.lib.stride_tricks import _broadcast_shape
 from . import _fastmath_ext
 
 
@@ -22,17 +23,15 @@ def multikron(a, b):
     if a.ndim == 2 and b.ndim == 2:
         # just a single matrix vector multiplication
         return np.kron(a, b)
-    if a.ndim == 2 and b.ndim == 3:
-        # a is just a single matrix
-        raise NotImplementedError
-    if a.ndim == 3 and b.ndim == 2:
-        # b is just a single matrix
-        raise NotImplementedError
     if a.shape[:-2] != b.shape[:-2]:
-        b = np.broadcast_to(b, a.shape[:-2] + b.shape[-2:])
-    a_contig = a.reshape(-1, a.shape[-2], a.shape[-1])
-    b_contig = b.reshape(-1, b.shape[-2], b.shape[-1])
+        shp = np.broadcast(a[..., 0, 0], b[..., 0, 0]).shape
+        a_bc = np.broadcast_to(a, shp + a.shape[-2:])
+        b_bc = np.broadcast_to(b, shp + b.shape[-2:])
+    else:
+        a_bc, b_bc = a, b
+    a_contig = a_bc.reshape(-1, a.shape[-2], a.shape[-1])
+    b_contig = b_bc.reshape(-1, b.shape[-2], b.shape[-1])
     if a_contig.shape[0] != b_contig.shape[0]:
         raise ValueError("array shapes are not compatible: %s vs %s. Expect shapes to be compatible up to the last 2 axes" % (a.shape, b.shape))
-    return _fastmath_ext.multikron(a_contig, b_contig).reshape(a.shape[:-2] + (a.shape[-2]*b.shape[-2], a.shape[-1]*b.shape[-1]))
+    return _fastmath_ext.multikron(a_contig, b_contig).reshape(a_bc.shape[:-2] + (a.shape[-2]*b.shape[-2], a.shape[-1]*b.shape[-1]))
 
