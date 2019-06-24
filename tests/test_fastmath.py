@@ -28,6 +28,16 @@ def test_matmat_ndim():
     r2 = np.array(list(map(np.dot, a.reshape(-1, 2, 4), b.reshape(-1, 4, 3)))).reshape(10, 11, 2, 3)
     np.testing.assert_allclose(r1, r2)
 
+def test_matmat_broadcast():
+    a = np.random.random((10, 11, 2, 4))
+    b = np.random.random((11, 4, 3))
+    r1 = matmat(a, b[np.newaxis])
+    r2 = np.array([
+        [np.dot(ai, bi) for ai, bi in zip(aj, b)]
+        for aj in a
+    ])
+    np.testing.assert_allclose(r1, r2)
+
 def test_matmat_noncontiguous():
     # a non-contiguous
     a = np.random.random((10, 3, 3)).swapaxes(1, 2)
@@ -76,6 +86,16 @@ def test_matvec_ndim():
     b = np.random.random((10, 31, 5))
     r1 = matvec(a, b)
     r2 = np.array(list(map(np.dot, a.reshape(-1, 4, 5), b.reshape(-1, 5)))).reshape(10, 31, 4)
+    np.testing.assert_allclose(r1, r2)
+
+def test_matvec_broadcast():
+    a = np.random.random((10, 31, 4, 5))
+    b = np.random.random((31, 5))
+    r1 = matvec(a, b[np.newaxis])
+    r2 = np.array([
+        [np.dot(ai, bi) for ai, bi in zip(aj, b)]
+        for aj in a
+    ])
     np.testing.assert_allclose(r1, r2)
 
 def test_matvec_single():
@@ -183,4 +203,14 @@ def test_multikron_noncontiguous():
     assert not b.flags.contiguous
     r1 = multikron(a, b)
     r2 = np.array(list(map(np.kron, a, b)))
+    np.testing.assert_allclose(r1, r2)
+
+def test_multikron_broadcast():
+    a = np.random.random((10, 11, 2, 4))
+    b = np.random.random((11, 4, 3))
+    r1 = multikron(a, b[np.newaxis])
+    r2 = np.array([
+        [np.kron(ai, bi) for ai, bi in zip(aj, b)]
+        for aj in a
+    ])
     np.testing.assert_allclose(r1, r2)

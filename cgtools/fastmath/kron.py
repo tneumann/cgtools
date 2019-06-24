@@ -28,6 +28,8 @@ def multikron(a, b):
     if a.ndim == 3 and b.ndim == 2:
         # b is just a single matrix
         raise NotImplementedError
+    if a.shape[:-2] != b.shape[:-2]:
+        b = np.broadcast_to(b, a.shape[:-2] + b.shape[-2:])
     a_contig = a.reshape(-1, a.shape[-2], a.shape[-1])
     b_contig = b.reshape(-1, b.shape[-2], b.shape[-1])
     if a_contig.shape[0] != b_contig.shape[0]:
