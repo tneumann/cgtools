@@ -26,7 +26,7 @@ def matmat(a, b):
         # b is just a single matrix
         return np.dot(a, b)
     if a.shape[-1] != b.shape[-2]:
-        raise ValueError("arrays must have suitable shape for matrix multiplication")
+        raise ValueError("arrays (shapes %s and %s)must have suitable shape for matrix multiplication" % (a.shape, b.shape))
 
     if a.shape[:-2] != b.shape[:-2]:
         shp = np.broadcast(a[..., 0, 0], b[..., 0, 0]).shape
