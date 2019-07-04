@@ -41,17 +41,38 @@ def triangle_triangle_adjacency_list(tris):
     return np.array([ts for ts in list(tri_by_edge.values()) if len(ts) == 2])
 
 
-def get_edges_from_triangles(tris):
+def get_edges_from_triangles(tris, directed=False):
     """
+    Returns the unique edges as an array of shape (n_edges, 2)
+    containing, for each edge, 2 indices of the vertices of each edge.
+
+    If directed = True (default), then all non-boundary edges will be returned twice, 
+    e.g. if there is an edge between vertex i and j, the returned array will include
+    (i, j) and (j, i)
+
     >>> tris = [[0, 1, 2], [2, 1, 3], [3, 1, 4]]
     >>> sorted(get_edges_from_triangles(tris).tolist())
+    [[0, 1], [0, 2], [1, 2], [1, 3], [1, 4], [2, 3], [3, 4]]
+    >>> tris = [[0, 1, 2], [2, 1, 3], [3, 1, 4]]
+    >>> sorted(get_edges_from_triangles(tris, directed=False).tolist())
     [[0, 1], [0, 2], [1, 2], [1, 3], [1, 4], [2, 3], [3, 4]]
     """
     tris = np.array(tris)
     all_edges = tris[:, [[0,1], [1,0], [1,2], [2,1], [2,0], [0,2]]].reshape((-1, 2))
     A = sparse.coo_matrix((np.ones(len(all_edges)), all_edges.T))
-    A = sparse.triu(A, format='csr')  # format csr necessary to remove duplicate entries in COO format
+    if directed:
+        A = sparse.triu(A, format='csr')  # format csr necessary to remove duplicate entries in COO format
+    else:
+        # TODO: format csr necessary in this case?
+        A = A.tocsr()
     return np.column_stack(A.nonzero())
+
+
+def edge_difference_matrix(tris, directed=False):
+    edges_ij = get_edges_from_triangles(tris, directed=directed)
+    return sparse.csr_matrix(
+        (np.tile([-1, 1], len(edges_ij)),
+         (np.repeat(np.arange(len(edges_ij)), 2), edges_ij.ravel())))
 
 
 def edge_adjacency_matrix(tris, n_verts=None):
