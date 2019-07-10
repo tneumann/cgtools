@@ -5,6 +5,8 @@ from tvtk.common import configure_input, configure_input_data
 import traits.api as ta
 import traitsui.api as tu
 
+from .animator import animate
+
 
 
 def mesh_as_vtk_actor(verts, tris=None, lines=None, compute_normals=True, return_polydata=True, scalars=None):
@@ -204,3 +206,15 @@ class MultiMeshViewer(ta.HasTraits):
 
 def vis_multimesh(list_verts, list_tris, **kw):
     MultiMeshViewer(list_verts, list_tris, **kw).configure_traits()
+
+
+def show_mesh_animation(list_verts, tris, **kw):
+    actor, pd = mesh_as_vtk_actor(list_verts[0], tris=tris, **kw)
+    mlab.gcf().scene.add_actor(actor)
+
+    @animate(len(list_verts))
+    def show_frame(frame):
+        pd.points = list_verts[frame]
+        
+    show_frame()
+    mlab.show()
