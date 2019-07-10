@@ -29,6 +29,8 @@ ext_modules = [
             get_pybind_include(),
             get_pybind_include(user=True),
             numpy.get_include(),
+            'include/eigen',
+            'include/libigl/include',
         ],
         language='c++'
     ),

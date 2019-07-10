@@ -2,6 +2,9 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 
+#include <Eigen/Core>
+#include <igl/polar_dec.h>
+
 namespace py = pybind11;
 
 
@@ -221,8 +224,35 @@ py::array_t<float_t> multikron(
 }
 
 
-PYBIND11_PLUGIN(_fastmath_ext) {
-    py::module m("_fastmath_ext");
+std::tuple<py::array_t<double>, py::array_t<double>>
+polarDecompose(py::array_t<double, py::array::c_style> Ms)
+{
+    using RowMat3d = Eigen::Matrix<double, 3, 3, Eigen::RowMajor>;
+
+    auto Ms_raw = Ms.unchecked<3>();
+    // allocate output matrices
+    auto Rs = py::array_t<double>({Ms_raw.shape(0), 3l, 3l});
+    auto Rs_raw = Rs.mutable_unchecked<3>();
+    auto Ss = py::array_t<double>({Ms_raw.shape(0), 3l, 3l});
+    auto Ss_raw = Ss.mutable_unchecked<3>();
+
+    for (int i = 0; i < Ms_raw.shape(0); ++i) {
+        const RowMat3d Mi = Eigen::Map<const RowMat3d>(Ms_raw.data(i, 0, 0));
+        Eigen::Map<RowMat3d> Ri_map(Rs_raw.mutable_data(i, 0, 0));
+        Eigen::Map<RowMat3d> Si_map(Ss_raw.mutable_data(i, 0, 0));
+        RowMat3d Ri = Ri_map; // performs copy, since igl::polar_dec does not take Eigen::Map
+        RowMat3d Si = Si_map;
+        igl::polar_dec(Mi, Ri, Si);
+        // write back results
+        Ri_map = Ri;
+        Si_map = Si;
+    }
+
+    return std::make_tuple(Rs, Ss);
+}
+
+
+PYBIND11_MODULE(_fastmath_ext, m) {
     m.def("inv3", &inv3<float>);
     m.def("inv3", &inv3<double>);
     m.def("inv2", &inv2<float>);
@@ -231,6 +261,5 @@ PYBIND11_PLUGIN(_fastmath_ext) {
     m.def("matvec", &matvec<double>);
     m.def("cross3", &cross3<double>);
     m.def("multikron", &multikron<double>);
-
-    return m.ptr();
+    m.def("polar_dec", &polarDecompose);
 }
