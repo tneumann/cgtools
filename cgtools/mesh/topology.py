@@ -157,3 +157,26 @@ def filter_triangles(vert_ix_or_mask, tris):
     vert_ix_or_mask = np.asarray(vert_ix_or_mask)
     fn = filter_reindex if vert_ix_or_mask.dtype == np.bool else take_reindex
     return fn(vert_ix_or_mask, tris)
+
+
+class ReorderByFaces(object):
+    def __init__(self, faces0, faces1):
+        self.ji = defaultdict(set)
+        max_i = 0
+        for face0, face1 in zip(faces0, faces1):
+            for i, j in zip(face0, face1):
+                self.ji[j].add(i)
+                max_i = max(max_i, i)
+        self._sz = max_i + 1
+    
+    def __call__(self, array):
+        array_reordered = np.zeros((self._sz,) + array.shape[1:])
+        for j, ixs in self.ji.iteritems():
+            for i in ixs:
+                # TODO: duplicating values here - is that ok or should we warn when those values are not consistent?
+                array_reordered[i] = array[j]
+        return array_reordered
+
+
+def reorder_by_faces(faces0, faces1, array):
+    return ReorderByFaces(faces0, faces1)(array)
