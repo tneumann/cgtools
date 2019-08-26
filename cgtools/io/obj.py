@@ -2,6 +2,8 @@ import numpy as np
 from os import path
 import re
 
+from . import _fastobj_ext
+
 
 # TODO: use \d  in triangle regex instead of [^\/\s]
 _triangle_regex = re.compile(r"^f\s+(\d+)\S*\s+(\d+)\S*\s+(\d+)", re.MULTILINE)
@@ -88,6 +90,10 @@ def load_obj(filename, load_normals=False, load_texcoords=False, load_texture=Fa
         r.append(texture)
 
     return r
+
+
+def load_obj_fast(filename, *args, **kw):
+    return _fastobj_ext.load_obj_fast(filename)
 
 
 def save_obj(filename, vertices, faces, normals=None, texcoords=None, texture_file=None):

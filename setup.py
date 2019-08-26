@@ -35,6 +35,17 @@ ext_modules = [
         language='c++'
     ),
     Extension(
+        'cgtools.io._fastobj_ext',
+        ['src/fast_obj.cpp'],
+        include_dirs=[
+            get_pybind_include(),
+            get_pybind_include(user=True),
+            numpy.get_include(),
+            'include/eigen',
+        ],
+        language='c++'
+    ),
+    Extension(
         'cgtools.mesh._intersections_ext',
         ['src/intersections.cpp'],
         include_dirs=[
