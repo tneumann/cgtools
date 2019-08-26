@@ -36,7 +36,8 @@ def deformation_transfer(verts_src, verts_src_deformed, verts_tgt, tris):
     # D contains deformation gradients for each triangle: (n_triangles, 3, 3)
     D = defgrads(verts_src, verts_src_deformed, tris)
     # setup & solve poisson system - see Chapter 5 in Botsch et al. 2006
-    L = compute_mesh_laplacian(verts_tgt, tris,  weight_type='cotangent',
+    # TODO: correct vertices used here? use verts_src instead of verts_tgt to construct laplacian?
+    L = compute_mesh_laplacian(verts_tgt, tris, weight_type='cotangent',
                                area_type='lumped_mass', return_vertex_area=False)
     rhs = D.transpose(0, 2, 1).reshape(-1, 3)
     verts = spsolve(L, div(verts_tgt, tris, rhs))
