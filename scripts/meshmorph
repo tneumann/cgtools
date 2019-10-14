@@ -1,0 +1,14 @@
+#!/usr/bin/env python
+
+import plac
+from cgtools.io import load_mesh
+from cgtools.vis.correspondences import morph_multimesh
+
+
+def main(*mesh_filenames):
+    verts, faces = zip(*[load_mesh(f) for f in mesh_filenames])
+    morph_multimesh(verts, faces[0], names=mesh_filenames)
+
+
+if __name__ == '__main__':
+    plac.call(main)

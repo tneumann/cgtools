@@ -138,5 +138,8 @@ setup(
     tests_require=[
         'pytest', 
     ],
+    scripts=[
+        'scripts/meshmorph'
+    ],
 )
 
