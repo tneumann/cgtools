@@ -150,6 +150,8 @@ class MultiMeshMorpher(ta.HasTraits):
         self._fig.scene.add_actor(self._actor)
 
         self.visible = self._names[0]
+        if len(self._names) > 1:
+            self.morph_target = self._names[1]
 
     @ta.on_trait_change('visible, show_edges, morph_target, morph_alpha')
     def _update(self):
