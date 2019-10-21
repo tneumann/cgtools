@@ -7,6 +7,7 @@ from scipy.sparse.csgraph import connected_components
 
 from .. import vector as V
 from ..indexing import filter_reindex, take_reindex
+from ._igl_ext import is_border_vertex
 
 
 def get_mesh_edges(verts, tris):
@@ -180,3 +181,4 @@ class ReorderByFaces(object):
 
 def reorder_by_faces(faces0, faces1, array):
     return ReorderByFaces(faces0, faces1)(array)
+

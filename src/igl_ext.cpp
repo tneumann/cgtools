@@ -5,6 +5,7 @@
 #include <pybind11/numpy.h>
 
 #include <igl/exact_geodesic.h>
+#include <igl/is_border_vertex.h>
 
 
 namespace py = pybind11;
@@ -34,6 +35,21 @@ PYBIND11_MODULE(_igl_ext, m) {
         }, 
         py::call_guard<py::gil_scoped_release>(),
         py::arg("verts"), py::arg("tris"), py::arg("src_vert_indices")
+    );
+
+    m.def("is_border_vertex", []
+        (const MatrixXi& F) 
+        -> Matrix<bool, Dynamic, 1>
+        {
+            std::vector<bool> b = igl::is_border_vertex(F);
+            Matrix<bool, Dynamic, 1> bm(b.size());
+            for (size_t i=0; i < b.size(); i++) {
+                bm(i) = b[i];
+            }
+            return bm;
+        },
+        py::call_guard<py::gil_scoped_release>(),
+        py::arg("tris")
     );
 }
 
