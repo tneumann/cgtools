@@ -96,6 +96,24 @@ def edge_adjacency_matrix(tris, n_verts=None):
     return A
 
 
+def vertex_triangle_adjacency_matrix(tris, n_verts=None):
+    """
+    Returns a scipy.sparse.csr_matrix of size n_tris x n_verts
+    where element (i, j) is one if triangle i is connected to vertex j.
+
+    If n_verts is None, it is determined automatically from the triangle array.
+    """
+    if n_verts is None:
+        n_verts = tris.max() + 1
+    vert_ix = tris.ravel()
+    tri_ix = np.repeat(np.arange(len(tris)), 3)
+    A = sparse.csr_matrix((
+        (np.ones(3*len(tris)), (vert_ix, tri_ix))
+    ))
+    A.data[:] = 1
+    return A
+
+
 def largest_connected_component(tris):
     """
     Returns vertex indices of the largest connected component of the mesh
