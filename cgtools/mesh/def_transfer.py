@@ -1,16 +1,13 @@
-import numpy as np
-from scipy.sparse.linalg import spsolve
+from scipy.sparse.linalg import factorized
 
 from .topology import get_triangle_frames
-from .div import div
+from .div import div_op
 from .laplacian import compute_mesh_laplacian
-from ..vector import normalized
-from ..fastmath.dot import matmat
-from ..fastmath.inv import inv3
+from ..fastmath import matmat, inv3
 
 
 def defgrads(verts_src, verts_deformed, tris):
-    """ 
+    """
     Compute deformation gradients between source and deformed mesh
     """
     S0 = get_triangle_frames(verts_src, tris)
@@ -19,7 +16,7 @@ def defgrads(verts_src, verts_deformed, tris):
 
 
 def deformation_transfer(verts_src, verts_src_deformed, verts_tgt, tris):
-    """ 
+    """
     Deforms vertices given in "verts_tgt" so that their deformation
     matches the deformation seen between "verts_src" and "verts_deformed".
 
@@ -33,14 +30,35 @@ def deformation_transfer(verts_src, verts_src_deformed, verts_tgt, tris):
         in VMV 2006
 
     """
-    # D contains deformation gradients for each triangle: (n_triangles, 3, 3)
-    D = defgrads(verts_src, verts_src_deformed, tris)
-    # setup & solve poisson system - see Chapter 5 in Botsch et al. 2006
-    # TODO: correct vertices used here? use verts_src instead of verts_tgt to construct laplacian?
-    L = compute_mesh_laplacian(verts_tgt, tris, weight_type='cotangent',
-                               area_type='lumped_mass', return_vertex_area=False)
-    rhs = D.transpose(0, 2, 1).reshape(-1, 3)
-    verts = spsolve(L, div(verts_tgt, tris, rhs))
-    # resolve translational ambiguity
-    verts -= (verts - verts_tgt).mean(axis=0)
-    return verts
+    s = DefGradSolver(verts_tgt, tris)
+    return s.transfer(verts_src, verts_src_deformed)
+
+
+class DefGradSolver(object):
+    def __init__(self, verts_template, tris):
+        self.v0 = verts_template
+        self.tris = tris
+        # setup poisson system - see Chapter 5 in Botsch et al. 2006
+        L = compute_mesh_laplacian(self.v0, self.tris, weight_type='cotangent',
+                                   area_type='lumped_mass', return_vertex_area=False)
+        self.solve = factorized(L.tocsc())
+        self.div = div_op(self.v0, self.tris)
+
+    def reconstruct(self, defgrads, align_to_template=True):
+        """ reconstruct from array of (num_tris, 3, 3), return vertex coordinates """
+        rhs = defgrads.transpose(0, 2, 1).reshape(-1, 3)
+        # solve poisson system - see Chapter 5 in Botsch et al. 2006
+        verts = self.solve(self.div * rhs)
+        if align_to_template:
+            verts -= (verts - self.v0).mean(axis=0)
+        return verts
+
+    def transfer(self, verts_src, verts_src_deformed, **kwargs):
+        """ 
+        computes the deformation between verts_src and verts_src_deformed
+        and applies this deformation to the verts_template passed to the constructor
+        of this DefgradSolver
+        """
+        # D contains deformation gradients for each triangle: (n_triangles, 3, 3)
+        D = defgrads(verts_src, verts_src_deformed, self.tris)
+        return self.reconstruct(D, **kwargs)
