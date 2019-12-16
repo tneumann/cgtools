@@ -140,7 +140,6 @@ class MultiMeshMorpher(ta.HasTraits):
 
         self._verts_by_name = dict(zip(self._names, list_verts))
         self._actor, self._pd = mesh_as_vtk_actor(list_verts[0], tris, return_polydata=True)
-        self._actor.mapper.immediate_mode_rendering = True
         self._actor.property.set(
             ambient=0.0,
             specular=0.15, 
