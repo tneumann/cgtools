@@ -47,7 +47,7 @@ def get_edges_from_triangles(tris, directed=False):
     Returns the unique edges as an array of shape (n_edges, 2)
     containing, for each edge, 2 indices of the vertices of each edge.
 
-    If directed = True (default), then all non-boundary edges will be returned twice, 
+    If directed = True (default=False), then all non-boundary edges will be returned twice, 
     e.g. if there is an edge between vertex i and j, the returned array will include
     (i, j) and (j, i)
 
@@ -61,11 +61,8 @@ def get_edges_from_triangles(tris, directed=False):
     tris = np.array(tris)
     all_edges = tris[:, [[0,1], [1,0], [1,2], [2,1], [2,0], [0,2]]].reshape((-1, 2))
     A = sparse.coo_matrix((np.ones(len(all_edges)), all_edges.T))
-    if directed:
+    if not directed:
         A = sparse.triu(A, format='csr')  # format csr necessary to remove duplicate entries in COO format
-    else:
-        # TODO: format csr necessary in this case?
-        A = A.tocsr()
     return np.column_stack(A.nonzero())
 
 
