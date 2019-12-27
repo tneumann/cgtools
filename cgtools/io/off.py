@@ -32,7 +32,7 @@ def save_off(filename, vertices=None, faces=None, scalars=None, vmin=None, vmax=
                 f.write(fmt % ((len(face),) + tuple(map(int, face))))
 
 def load_off(filename, no_colors=False):
-    lines = open(filename).readlines()
+    lines = open(filename, errors='ignore').readlines()
     lines = [line for line in lines if line.strip() != '' and line[0] != '#']
     assert lines[0].strip() in ['OFF', 'COFF'], 'OFF header missing'
     has_colors = lines[0].strip() == 'COFF'
