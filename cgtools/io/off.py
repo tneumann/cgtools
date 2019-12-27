@@ -20,8 +20,9 @@ def save_off(filename, vertices=None, faces=None, scalars=None, vmin=None, vmax=
 
                 elif colors is not None:
                     rgba = colors
-                    if rgba.dtype != np.uint8:
-                        rgba = (rgba * 255).astype(np.uint8)
+
+                if rgba.dtype != np.uint8:
+                    rgba = (rgba * 255).astype(np.uint8)
 
                 np.savetxt(f, np.hstack((vertices, rgba[:, :3])), fmt="%.12f %.12f %.12f %d %d %d")
             else:
