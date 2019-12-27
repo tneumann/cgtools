@@ -4,6 +4,7 @@
 
 #include <Eigen/Core>
 #include <igl/polar_dec.h>
+#include <igl/polar_svd.h>
 
 namespace py = pybind11;
 
@@ -236,13 +237,19 @@ polarDecompose(py::array_t<double, py::array::c_style> Ms)
     auto Ss = py::array_t<double>({Ms_raw.shape(0), 3l, 3l});
     auto Ss_raw = Ss.mutable_unchecked<3>();
 
+    RowMat3d U;
+    RowMat3d V;
+    Eigen::Matrix<double,3,1> S;
+
     for (int i = 0; i < Ms_raw.shape(0); ++i) {
         const RowMat3d Mi = Eigen::Map<const RowMat3d>(Ms_raw.data(i, 0, 0));
         Eigen::Map<RowMat3d> Ri_map(Rs_raw.mutable_data(i, 0, 0));
         Eigen::Map<RowMat3d> Si_map(Ss_raw.mutable_data(i, 0, 0));
         RowMat3d Ri = Ri_map; // performs copy, since igl::polar_dec does not take Eigen::Map
         RowMat3d Si = Si_map;
-        igl::polar_dec(Mi, Ri, Si);
+        //igl::polar_dec(Mi, Ri, Si);
+        igl::polar_svd(Mi, Ri, Si, U, S, V);
+        // TODO: use igl::polar_svd3x3?
         // write back results
         Ri_map = Ri;
         Si_map = Si;
